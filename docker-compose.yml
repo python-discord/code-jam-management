@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+    postgres:
+        image: postgres:13-alpine
+        environment:
+            POSTGRES_DB: codejam_management
+            POSTGRES_PASSWORD: codejam_management
+            POSTGRES_USER: codejam_management
+        volumes:
+            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    api:
+        build: .
+        restart: always
+        ports:
+            - 4269:4269
