@@ -12,5 +12,7 @@ services:
     api:
         build: .
         restart: always
+        environment:
+            DATABASE_URL: postgres://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
             - 4269:4269
