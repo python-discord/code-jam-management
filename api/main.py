@@ -85,8 +85,8 @@ async def get_codejam(request: Request, codejam: int) -> dict[str, Any]:
     """Get a specific codejam stored in the database by ID."""
     codejams = await get_codejams(request)
     return next(
-        (codejam for codejam in codejams if codejam["id"] == codejam),
-        JSONResponse(dict(message="The specified codejam was not found."))
+        (jam for jam in codejams if jam["id"] == codejam),
+        JSONResponse(dict(message="The specified codejam was not found."), 404)
     )
 
 
@@ -101,13 +101,13 @@ async def create_codejam(request: Request, codejam: CodeJam) -> Response:
             "INSERT INTO teams (jam_id, team_name) VALUES ($1, $2) RETURNING team_id",
             new_jam["jam_id"], team.name,
         )
-        for user in team.users:
-            await request.state.db_conn.execute(
-                "INSERT INTO users (user_id) VALUES ($1)", user.user_id
-            )
-            await request.state.db_conn.execute(
-                "INSERT INTO team_has_user (team_id, user_id, is_leader) VALUES ($1, $2, $3)",
-                new_team["team_id"], user.user_id, user.is_leader
-            )
+        await request.state.db_conn.executemany(
+            "INSERT INTO users (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+            [(user.user_id,) for user in team.users]
+        )
+        await request.state.db_conn.executemany(
+            "INSERT INTO team_has_user (team_id, user_id, is_leader) VALUES ($1, $2, $3)",
+            [(new_team["team_id"], user.user_id, user.is_leader) for user in team.users]
+        )
 
     return await get_codejam(request, new_jam["jam_id"])
