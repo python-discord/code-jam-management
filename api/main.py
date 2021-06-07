@@ -33,7 +33,7 @@ async def setup_data(request: Request, callnext: Callable) -> Response:
 
 
 async def get_codejam_data(request: Request, jam_id: int, jam_name: str) -> dict:
-    """Gets all the data stored in the database about the spefied codejam."""
+    """Gets all the data stored in the database about the specified codejam."""
     codejam = {"id": jam_id, "name": jam_name}
 
     db_teams = await request.state.db_conn.fetch(
@@ -72,7 +72,7 @@ async def get_codejam_data(request: Request, jam_id: int, jam_name: str) -> dict
     codejam["winners"] = [
         dict(winner)
         for winner in await request.state.db_conn.fetch(
-            "SELECT user_id, first_place FROM winners WHERE jam_id = $1", jam_id
+            "SELECT user_id, winner FROM winners WHERE jam_id = $1", jam_id
         )
     ]
 
