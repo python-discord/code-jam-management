@@ -32,7 +32,7 @@ async def setup_data(request: Request, callnext: Callable) -> Response:
         request.state.db_conn = None
 
 
-async def get_codejam_data(request: Request, jam_id: int, jam_name: str) -> dict:
+async def get_codejam_data(request: Request, jam_id: int, jam_name: str) -> dict[str, Any]:
     """Gets all the data stored in the database about the specified codejam."""
     codejam = {"id": jam_id, "name": jam_name}
 
@@ -72,7 +72,7 @@ async def get_codejam_data(request: Request, jam_id: int, jam_name: str) -> dict
     codejam["winners"] = [
         dict(winner)
         for winner in await request.state.db_conn.fetch(
-            "SELECT user_id, winner FROM winners WHERE jam_id = $1", jam_id
+            "SELECT user_id, first_place FROM winners WHERE jam_id = $1", jam_id
         )
     ]
 
@@ -108,7 +108,7 @@ async def get_codejam(request: Request, codejam_id: int) -> dict[str, Any]:
 
 
 @app.post("/codejams", response_model=CodeJamResponse)
-async def create_codejam(request: Request, codejam: CodeJam) -> Response:
+async def create_codejam(request: Request, codejam: CodeJam) -> dict[str, Any]:
     """Create a new codejam and get back the one just created."""
     new_jam = await request.state.db_conn.fetchrow(
         "INSERT INTO jams (jam_name) VALUES ($1) RETURNING jam_id",

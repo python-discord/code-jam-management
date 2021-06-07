@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS team_has_user (
 CREATE TABLE IF NOT EXISTS winners (
     jam_id int references jams(jam_id) NOT NULL,
     user_id bigint references users(user_id),
-    winner boolean NOT NULL
+    first_place boolean NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS infractions (
