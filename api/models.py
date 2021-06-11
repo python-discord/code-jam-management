@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import BaseModel
 
 
@@ -39,19 +41,34 @@ class Winner(BaseModel):
     first_place: bool
 
 
-class TeamResponse(BaseModel):
+class ParticipationHistory(BaseModel):
+    """A model representing the participathon history of a user in a codejam."""
+
+    jam_id: int
+    top_10: bool
+    first_place: bool
+    team_id: int
+    is_leader: bool
+    infractions: list[Infraction]
+
+
+class UserResponse(BaseModel):
+    """Response model representing a user."""
+
+    user_id: int
+    participation_history: list[ParticipationHistory]
+
+
+class TeamResponse(Team):
     """Response model representing a team."""
 
     id: int
-    name: str
-    users: list[User]
 
 
-class CodeJamResponse(BaseModel):
+class CodeJamResponse(CodeJam):
     """Response model representing a code jam."""
 
     id: int
-    name: str
     teams: list[TeamResponse]
     infractions: list[Infraction]
     winners: list[Winner]
