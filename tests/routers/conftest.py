@@ -12,13 +12,13 @@ async def delete_jam(jam: models.CodeJamResponse, db: asyncpg.Connection) -> Non
     # delete on the database foreign keys, which would simplify deletion
     # here. An exercise for the reader!
     for team in jam.teams:
-        await db.execute("DELETE FROM team_has_user WHERE team_id = $1", team.id)
+        await db.execute("DELETE FROM team_has_user WHERE team_id = $1", team.team_id)
 
     # As we do not have a filter we can apply here, the table is checked for
     # being empty at the caller site.
     await db.execute("DELETE FROM users")
-    await db.execute("DELETE FROM teams WHERE jam_id = $1", jam.id)
-    await db.execute("DELETE FROM jams WHERE jam_id = $1", jam.id)
+    await db.execute("DELETE FROM teams WHERE jam_id = $1", jam.jam_id)
+    await db.execute("DELETE FROM jams WHERE jam_id = $1", jam.jam_id)
 
 
 @pytest.fixture(scope='session')

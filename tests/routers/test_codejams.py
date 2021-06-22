@@ -27,7 +27,7 @@ async def test_get_nonexistent_code_jam(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_get_existing_code_jam(client: AsyncClient, created_codejam: models.CodeJamResponse) -> None:
     """Getting an existing code jam should return 200."""
-    response = await client.get(f'/codejams/{created_codejam.id}')
+    response = await client.get(f'/codejams/{created_codejam.jam_id}')
     assert response.status_code == 200
     raw = response.json()
     jam = models.CodeJamResponse(**raw)
