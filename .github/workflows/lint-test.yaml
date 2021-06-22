@@ -1,4 +1,4 @@
-name: Lint
+name: Lint & Test
 
 on:
   push:
@@ -14,6 +14,21 @@ jobs:
   lint:
     name: Run pre-commit & flake8
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
     env:
       # Configure pip to cache dependencies and do a user install
       PIP_NO_CACHE_DIR: false
@@ -91,6 +106,23 @@ jobs:
       - name: Run flake8
         run: "flake8 \
         --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'"
+
+      # We run `coverage` using the `python` command so we can suppress
+      # irrelevant warnings in our CI output.
+      - name: Run tests and generate coverage report
+        env:
+            # DB for the tests to connect to
+            DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+        run: |
+            python -Wignore -m coverage run -m pytest
+            coverage report -m
+
+      # This step will publish the coverage reports coveralls.io and
+      # print a "job" link in the output of the GitHub Action
+      - name: Publish coverage report to coveralls.io
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: coveralls --service=github
 
       # Prepare the Pull Request Payload artifact. If this fails, we
       # we fail silently using the `continue-on-error` option. It's
