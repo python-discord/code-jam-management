@@ -16,7 +16,7 @@ async def fetch_codejams(conn: asyncpg.Connection) -> list[tuple[int, str]]:
 
 async def get_codejam_data(conn: asyncpg.Connection, jam_id: int, jam_name: str) -> dict[str, Any]:
     """Gets all the data stored in the database about the specified codejam."""
-    codejam = {"id": jam_id, "name": jam_name}
+    codejam = {"jam_id": jam_id, "name": jam_name}
 
     db_teams = await conn.fetch(
         "SELECT team_id, team_name FROM teams WHERE jam_id = $1", jam_id
@@ -39,7 +39,7 @@ async def get_codejam_data(conn: asyncpg.Connection, jam_id: int, jam_name: str)
 
         team["users"] = users
         team["name"] = team_name
-        team["id"] = team_id
+        team["team_id"] = team_id
         teams.append(team)
 
     codejam["teams"] = teams
