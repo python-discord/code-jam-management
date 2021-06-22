@@ -17,13 +17,17 @@ flake8-tidy-imports = "^4.3.0"
 flake8-todo = "^0.7"
 pep8-naming = "^0.11.1"
 uvicorn = "^0.13.4"
-fastapi = "^0.65.1"
+fastapi = "^0.65.2"
 asyncpg = "^0.23.0"
 python-decouple = "^3.4"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.12.1"
 flake8 = "^3.9.2"
+pytest = "^6.2.4"
+pytest-asyncio = "^0.15.1"
+httpx = "^0.18.1"
+pytest-cov = "^2.12.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
