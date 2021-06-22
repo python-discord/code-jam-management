@@ -3,13 +3,14 @@ from typing import Callable
 from fastapi import FastAPI, Request, Response
 
 from api.constants import DATABASE_POOL
-from api.routers import codejams, users
+from api.routers import codejams, infractions, users
 
 
-app = FastAPI(docs_url=None, redoc_url="/")
+app = FastAPI(docs_url="/docs", redoc_url="/")
 
 app.include_router(codejams.router)
 app.include_router(users.router)
+app.include_router(infractions.router)
 
 
 @app.on_event("startup")
@@ -31,5 +32,6 @@ async def setup_data(request: Request, callnext: Callable) -> Response:
         async with DATABASE_POOL.acquire() as connection:
             request.state.db_conn = connection
             return await callnext(request)
+
     finally:
         request.state.db_conn = None

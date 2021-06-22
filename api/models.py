@@ -1,4 +1,4 @@
-from __future__ import annotations
+from enum import Enum
 
 from pydantic import BaseModel
 
@@ -24,14 +24,21 @@ class CodeJam(BaseModel):
     teams: list[Team]
 
 
+class InfractionType(str, Enum):
+    """An enumeration of codejam infraction types."""
+
+    note = "note"
+    ban = "ban"
+    warning = "warning"
+
+
 class Infraction(BaseModel):
     """A model representing an infraction."""
 
-    infraction_id: int
     user_id: int
     jam_id: int
-    infraction_type: str
     reason: str
+    infraction_type: InfractionType
 
 
 class Winner(BaseModel):
@@ -39,6 +46,18 @@ class Winner(BaseModel):
 
     user_id: int
     first_place: bool
+
+
+class TeamResponse(Team):
+    """Response model representing a team."""
+
+    team_id: int
+
+
+class InfractionResponse(Infraction):
+    """Reponse model representing an infraction."""
+
+    infraction_id: int
 
 
 class ParticipationHistory(BaseModel):
@@ -49,7 +68,7 @@ class ParticipationHistory(BaseModel):
     first_place: bool
     team_id: int
     is_leader: bool
-    infractions: list[Infraction]
+    infractions: list[InfractionResponse]
 
 
 class UserResponse(BaseModel):
@@ -59,16 +78,10 @@ class UserResponse(BaseModel):
     participation_history: list[ParticipationHistory]
 
 
-class TeamResponse(Team):
-    """Response model representing a team."""
-
-    id: int
-
-
 class CodeJamResponse(CodeJam):
     """Response model representing a code jam."""
 
-    id: int
+    jam_id: int
     teams: list[TeamResponse]
-    infractions: list[Infraction]
+    infractions: list[InfractionResponse]
     winners: list[Winner]
