@@ -20,7 +20,7 @@ class Team(BaseModel):
 class CodeJam(BaseModel):
     """A model representing a codejam."""
 
-    name: str
+    jam_name: str
     teams: list[Team]
 
 
@@ -85,3 +85,8 @@ class CodeJamResponse(CodeJam):
     teams: list[TeamResponse]
     infractions: list[InfractionResponse]
     winners: list[Winner]
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True

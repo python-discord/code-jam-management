@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from api.constants import DATABASE_URL
 
 
-engine = create_async_engine(DATABASE_URL)
+engine = create_async_engine(DATABASE_URL, echo=True)
 Base = declarative_base()
 
 Session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
@@ -41,6 +41,8 @@ class Jam(Base):
     jam_name = Column(Text, nullable=False)
 
     teams = relationship("Team", back_populates="jam")
+    winners = relationship("Winner", back_populates="jam")
+    infractions = relationship("Infraction")
 
 
 class Team(Base):
@@ -63,8 +65,7 @@ class Winner(Base):
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
     first_place = Column(Boolean, nullable=False)
 
-    jam = relationship("Jam")
-    user = relationship("User")
+    jam = relationship("Jam", back_populates="winners")
 
 
 class Infraction(Base):
