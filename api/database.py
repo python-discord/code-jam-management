@@ -16,6 +16,7 @@ class TeamUser(Base):
     """A user who belongs to a team."""
 
     __tablename__ = "team_has_user"
+
     team_id = Column(ForeignKey("teams.team_id"), nullable=False)
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
     is_leader = Column(Boolean, nullable=False)
@@ -28,6 +29,7 @@ class User(Base):
     """A user who has participated in a code jam."""
 
     __tablename__ = "users"
+
     user_id = Column(BigInteger, primary_key=True, autoincrement=False)
 
     teams = relationship("TeamUser", back_populates="users")
@@ -37,6 +39,7 @@ class Jam(Base):
     """A code jam."""
 
     __tablename__ = "jams"
+
     jam_id = Column(Integer, primary_key=True, autoincrement=True)
     jam_name = Column(Text, nullable=False)
 
@@ -49,6 +52,7 @@ class Team(Base):
     """A team participating in a code jam."""
 
     __tablename__ = "teams"
+
     team_id = Column(Integer, primary_key=True, autoincrement=True)
     jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
     team_name = Column(Text, nullable=False)
@@ -61,6 +65,7 @@ class Winner(Base):
     """A user who has won a code jam."""
 
     __tablename__ = "winners"
+
     jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
     first_place = Column(Boolean, nullable=False)
@@ -72,6 +77,7 @@ class Infraction(Base):
     """An infraction that was applied to a user."""
 
     __tablename__ = "infractions"
+
     infraction_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(ForeignKey("users.user_id"))
     jam_id = Column(ForeignKey("jams.jam_id"))
