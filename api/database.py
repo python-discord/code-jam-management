@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Integer, Text
+from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Integer, Text, PrimaryKeyConstraint
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -16,6 +16,9 @@ class TeamUser(Base):
     """A user who belongs to a team."""
 
     __tablename__ = "team_has_user"
+    __table_args__ = (
+        PrimaryKeyConstraint('team_id', 'user_id'),
+    )
 
     team_id = Column(ForeignKey("teams.team_id"), nullable=False)
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
@@ -65,6 +68,9 @@ class Winner(Base):
     """A user who has won a code jam."""
 
     __tablename__ = "winners"
+    __table_args__ = (
+        PrimaryKeyConstraint('jam_id', 'user_id'),
+    )
 
     jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
