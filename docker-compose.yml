@@ -13,6 +13,6 @@ services:
         build: .
         restart: always
         environment:
-            DATABASE_URL: postgres://codejam_management:codejam_management@postgres:5432/codejam_management
+            DATABASE_URL: postgresql+asyncpg://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
             - 5000:5000
