@@ -19,13 +19,15 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS team_has_user (
     team_id int references teams(team_id) NOT NULL,
     user_id bigint references users(user_id) NOT NULL,
-    is_leader boolean NOT NULL
+    is_leader boolean NOT NULL,
+    CONSTRAINT team_has_user_pk PRIMARY KEY (team_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS winners (
     jam_id int references jams(jam_id) NOT NULL,
     user_id bigint references users(user_id),
-    first_place boolean NOT NULL
+    first_place boolean NOT NULL,
+    CONSTRAINT winners_pk PRIMARY KEY (jam_id, user_id)
 );
 
 CREATE TYPE infraction_type AS ENUM (
