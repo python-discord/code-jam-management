@@ -48,7 +48,7 @@ class Jam(Base):
 
     teams = relationship("Team", back_populates="jam", lazy="joined")
     winners = relationship("Winner", back_populates="jam", lazy="joined")
-    infractions = relationship("Infraction", lazy="joined")
+    infractions = relationship("Infraction", back_populates="jam", lazy="joined")
 
 
 class Team(Base):
@@ -89,3 +89,6 @@ class Infraction(Base):
     jam_id = Column(ForeignKey("jams.jam_id"))
     infraction_type = Column(Enum("note", "ban", "warning", name="infraction_type"), nullable=False)
     reason = Column(Text, nullable=False)
+
+    user = relationship("User", lazy="joined")
+    jam = relationship("Jam", back_populates="infractions", lazy="joined")
