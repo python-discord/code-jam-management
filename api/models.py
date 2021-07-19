@@ -52,6 +52,11 @@ class Winner(BaseModel):
     user_id: int
     first_place: bool
 
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
+
 
 class TeamResponse(Team):
     """Response model representing a team."""
