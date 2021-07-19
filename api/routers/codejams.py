@@ -1,17 +1,18 @@
 from typing import Any
 
 import asyncpg
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from sqlalchemy import desc
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
 
+from api.database import Jam
+from api.dependencies import get_db_session
 from api.models import CodeJam, CodeJamResponse
 
 
 router = APIRouter(prefix="/codejams", tags=["codejams"])
-
-
-async def fetch_codejams(conn: asyncpg.Connection) -> list[tuple[int, str]]:
-    """Fetch all the codejams stored in the database."""
-    return await conn.fetch("SELECT jam_id, jam_name FROM jams ORDER BY jam_id DESC")
 
 
 async def get_codejam_data(conn: asyncpg.Connection, jam_id: int, jam_name: str) -> dict[str, Any]:
@@ -62,16 +63,12 @@ async def get_codejam_data(conn: asyncpg.Connection, jam_id: int, jam_name: str)
 
 
 @router.get("/", response_model=list[CodeJamResponse])
-async def get_codejams(request: Request) -> list[dict[str, Any]]:
+async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[dict[str, Any]]:
     """Get all the codejams stored in the database."""
-    db_codejams = await fetch_codejams(request.state.db_conn)
-    codejams = []
+    codejams = await session.execute(select(Jam).order_by(desc(Jam.id)))
+    codejams.unique()
 
-    for jam_id, jam_name in db_codejams:
-        codejam = await get_codejam_data(request.state.db_conn, jam_id, jam_name)
-        codejams.append(codejam)
-
-    return codejams
+    return codejams.scalars().all()
 
 
 @router.get(
