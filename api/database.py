@@ -20,8 +20,8 @@ class TeamUser(Base):
         PrimaryKeyConstraint('team_id', 'user_id'),
     )
 
-    team_id = Column(ForeignKey("teams.team_id"), nullable=False)
-    user_id = Column(ForeignKey("users.user_id"), nullable=False)
+    team_id = Column(ForeignKey("teams.id"), nullable=False)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
     is_leader = Column(Boolean, nullable=False)
 
     team = relationship("Team", back_populates="users", lazy="joined")
@@ -33,7 +33,7 @@ class User(Base):
 
     __tablename__ = "users"
 
-    user_id = Column(BigInteger, primary_key=True, autoincrement=False)
+    id = Column(BigInteger, primary_key=True, autoincrement=False)
 
     teams = relationship("TeamUser", back_populates="user", lazy="joined")
 
@@ -43,8 +43,8 @@ class Jam(Base):
 
     __tablename__ = "jams"
 
-    jam_id = Column(Integer, primary_key=True, autoincrement=True)
-    jam_name = Column(Text, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(Text, nullable=False)
 
     teams = relationship("Team", back_populates="jam", lazy="joined")
     winners = relationship("Winner", back_populates="jam", lazy="joined")
@@ -56,9 +56,9 @@ class Team(Base):
 
     __tablename__ = "teams"
 
-    team_id = Column(Integer, primary_key=True, autoincrement=True)
-    jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
-    team_name = Column(Text, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    jam_id = Column(ForeignKey("jams.id"), nullable=False)
+    name = Column(Text, nullable=False)
 
     jam = relationship("Jam", back_populates="teams", lazy="joined")
     users = relationship("TeamUser", back_populates="team", lazy="joined")
@@ -72,8 +72,8 @@ class Winner(Base):
         PrimaryKeyConstraint('jam_id', 'user_id'),
     )
 
-    jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
-    user_id = Column(ForeignKey("users.user_id"), nullable=False)
+    jam_id = Column(ForeignKey("jams.id"), nullable=False)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
     first_place = Column(Boolean, nullable=False)
 
     jam = relationship("Jam", back_populates="winners", lazy="joined")
@@ -84,9 +84,9 @@ class Infraction(Base):
 
     __tablename__ = "infractions"
 
-    infraction_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(ForeignKey("users.user_id"))
-    jam_id = Column(ForeignKey("jams.jam_id"))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(ForeignKey("users.id"))
+    jam_id = Column(ForeignKey("jams.id"))
     infraction_type = Column(Enum("note", "ban", "warning", name="infraction_type"), nullable=False)
     reason = Column(Text, nullable=False)
 

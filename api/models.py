@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class User(BaseModel):
@@ -8,6 +8,11 @@ class User(BaseModel):
 
     user_id: int
     is_leader: bool
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
 
 
 class Team(BaseModel):
@@ -20,7 +25,7 @@ class Team(BaseModel):
 class CodeJam(BaseModel):
     """A model representing a codejam."""
 
-    jam_name: str
+    name: str
     teams: list[Team]
 
 
@@ -51,7 +56,7 @@ class Winner(BaseModel):
 class TeamResponse(Team):
     """Response model representing a team."""
 
-    team_id: int
+    id: int
 
     class Config:
         """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
@@ -62,7 +67,7 @@ class TeamResponse(Team):
 class InfractionResponse(Infraction):
     """Reponse model representing an infraction."""
 
-    infraction_id: int
+    id: int
 
     class Config:
         """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
@@ -89,7 +94,7 @@ class ParticipationHistory(BaseModel):
 class UserResponse(BaseModel):
     """Response model representing a user."""
 
-    user_id: int
+    id: int
     participation_history: list[ParticipationHistory]
 
     class Config:
@@ -101,7 +106,7 @@ class UserResponse(BaseModel):
 class CodeJamResponse(CodeJam):
     """Response model representing a code jam."""
 
-    jam_id: int
+    id: int
     teams: list[TeamResponse]
     infractions: list[InfractionResponse]
     winners: list[Winner]
