@@ -35,7 +35,7 @@ class User(Base):
 
     user_id = Column(BigInteger, primary_key=True, autoincrement=False)
 
-    teams = relationship("TeamUser", back_populates="users")
+    teams = relationship("TeamUser", back_populates="user")
 
 
 class Jam(Base):
@@ -46,9 +46,9 @@ class Jam(Base):
     jam_id = Column(Integer, primary_key=True, autoincrement=True)
     jam_name = Column(Text, nullable=False)
 
-    teams = relationship("Team", back_populates="jam")
-    winners = relationship("Winner", back_populates="jam")
-    infractions = relationship("Infraction")
+    teams = relationship("Team", back_populates="jam", lazy="joined")
+    winners = relationship("Winner", back_populates="jam", lazy="joined")
+    infractions = relationship("Infraction", lazy="joined")
 
 
 class Team(Base):
