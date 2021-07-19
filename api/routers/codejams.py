@@ -1,13 +1,12 @@
 from typing import Any
 
 import asyncpg
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
 
-from api.database import Jam
+from api.database import Jam, Team, User, TeamUser
 from api.dependencies import get_db_session
 from api.models import CodeJam, CodeJamResponse
 
@@ -92,28 +91,36 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
 
 
 @router.post("/", response_model=CodeJamResponse)
-async def create_codejam(request: Request, codejam: CodeJam) -> dict[str, Any]:
+async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
     """Create a new codejam and get back the one just created."""
-    new_jam_id = await request.state.db_conn.fetchval(
-        "INSERT INTO jams (jam_name) VALUES ($1) RETURNING jam_id",
-        codejam.name,
-    )
-    for team in codejam.teams:
-        new_team_id = await request.state.db_conn.fetchval(
-            "INSERT INTO teams (jam_id, team_name) VALUES ($1, $2) RETURNING team_id",
-            new_jam_id,
-            team.name,
-        )
-        await request.state.db_conn.executemany(
-            "INSERT INTO users (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
-            [(user.user_id,) for user in team.users],
-        )
-        await request.state.db_conn.executemany(
-            "INSERT INTO team_has_user (team_id, user_id, is_leader) VALUES ($1, $2, $3)",
-            [
-                (new_team_id, user.user_id, user.is_leader)
-                for user in team.users
-            ],
-        )
+    jam = Jam(name=codejam.name)
+    session.add(jam)
+    # Flush here to receive jam ID
+    await session.flush()
 
-    return await get_codejam_data(request.state.db_conn, new_jam_id, codejam.name)
+    for raw_team in codejam.teams:
+        team = Team(jam_id=jam.id, name=raw_team.name)
+        session.add(team)
+        # Flush here to receive team ID
+        await session.flush()
+
+        for raw_user in raw_team.users:
+            if not (
+                    await session.execute(select(User).where(User.id == raw_user.user_id))
+            ).unique().scalars().one_or_none():
+                user = User(id=raw_user.user_id)
+                session.add(user)
+
+            team_user = TeamUser(team_id=team.id, user_id=raw_user.user_id, is_leader=raw_user.is_leader)
+            session.add(team_user)
+
+    await session.flush()
+
+    # Pydantic, what is synchronous, may attempt to call async methods if current jam
+    # object is returned. To avoid this, fetch all data here, in async context.
+    jam_result = await session.execute(select(Jam).where(Jam.id == jam.id))
+    jam_result.unique()
+
+    jam = jam_result.scalars().one()
+
+    return jam
