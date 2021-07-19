@@ -80,16 +80,15 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
         }
     }
 )
-async def get_codejam(request: Request, codejam_id: int) -> dict[str, Any]:
+async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
     """Get a specific codejam stored in the database by ID."""
-    jam_name = await request.state.db_conn.fetchval(
-        "SELECT jam_name FROM jams WHERE jam_id = $1", codejam_id
-    )
+    jam_result = await session.execute(select(Jam).where(Jam.id == codejam_id))
+    jam_result.unique()
 
-    if not jam_name:
+    if not (jam := jam_result.scalars().one_or_none()):
         raise HTTPException(status_code=404, detail="CodeJam with specified ID could not be found.")
 
-    return await get_codejam_data(request.state.db_conn, codejam_id, jam_name)
+    return jam
 
 
 @router.post("/", response_model=CodeJamResponse)
