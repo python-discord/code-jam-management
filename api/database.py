@@ -24,8 +24,8 @@ class TeamUser(Base):
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
     is_leader = Column(Boolean, nullable=False)
 
-    team = relationship("Team", back_populates="users")
-    user = relationship("User", back_populates="teams")
+    team = relationship("Team", back_populates="users", lazy="joined")
+    user = relationship("User", back_populates="teams", lazy="joined")
 
 
 class User(Base):
@@ -35,7 +35,7 @@ class User(Base):
 
     user_id = Column(BigInteger, primary_key=True, autoincrement=False)
 
-    teams = relationship("TeamUser", back_populates="user")
+    teams = relationship("TeamUser", back_populates="user", lazy="joined")
 
 
 class Jam(Base):
@@ -60,8 +60,8 @@ class Team(Base):
     jam_id = Column(ForeignKey("jams.jam_id"), nullable=False)
     team_name = Column(Text, nullable=False)
 
-    jam = relationship("Jam", back_populates="teams")
-    users = relationship("TeamUser", back_populates="team")
+    jam = relationship("Jam", back_populates="teams", lazy="joined")
+    users = relationship("TeamUser", back_populates="team", lazy="joined")
 
 
 class Winner(Base):
@@ -76,7 +76,7 @@ class Winner(Base):
     user_id = Column(ForeignKey("users.user_id"), nullable=False)
     first_place = Column(Boolean, nullable=False)
 
-    jam = relationship("Jam", back_populates="winners")
+    jam = relationship("Jam", back_populates="winners", lazy="joined")
 
 
 class Infraction(Base):
