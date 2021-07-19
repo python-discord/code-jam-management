@@ -1,8 +1,12 @@
 from typing import Any
 
 import asyncpg
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
+from api.database import User, TeamUser, Infraction
+from api.dependencies import get_db_session
 from api.models import UserResponse
 
 
@@ -19,44 +23,30 @@ async def fetch_users(conn: asyncpg.Connection) -> list[int]:
     ]
 
 
-async def get_user_data(conn: asyncpg.Connection, id: int) -> dict[str, Any]:
+async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
     """Get the participation history of the specified user."""
-    user: dict[str, Any] = {"user_id": id}
+    user: dict[str, Any] = {"id": user_id}
     participation_history = []
 
-    user_teams = await conn.fetch(
-        "SELECT user_id, team_id, is_leader from team_has_user WHERE user_id = $1",
-        id
-    )
+    user_teams = await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))
+    user_teams.unique()
 
-    for user_id, team_id, is_leader in user_teams:
-        jam_id = await conn.fetchval(
-            "SELECT jam_id FROM teams WHERE team_id = $1", team_id
-        )
+    for user_team in user_teams.scalars().all():
+        top_10 = False
+        first_place = False
 
-        winner = await conn.fetchrow(
-            "SELECT first_place FROM winners WHERE jam_id = $1 AND user_id = $2",
-            jam_id, user_id
-        )
+        for winner in user_team.team.jam.winners:
+            if winner.user_id == user_id:
+                top_10 = True
+                first_place = winner.first_place
+                break
 
-        if winner is not None:
-            first_place: bool = winner["first_place"]
-            top_10 = True
-        else:
-            first_place = top_10 = False
-
-        infractions = [
-            dict(infraction)
-            for infraction in await conn.fetch(
-                "SELECT * FROM infractions WHERE jam_id = $1 AND user_id = $2",
-                jam_id, user_id
-            )
-        ]
+        infractions = [infraction for infraction in user_team.team.jam.infractions if infraction.user_id == user_id]
 
         participation_history.append(
             {
-                "jam_id": jam_id, "top_10": top_10, "first_place": first_place,
-                "team_id": team_id, "is_leader": is_leader, "infractions": infractions
+                "jam_id": user_team.team.jam.id, "top_10": top_10, "first_place": first_place,
+                "team_id": user_team.team.id, "is_leader": user_team.is_leader, "infractions": infractions
             }
         )
 
@@ -66,11 +56,12 @@ async def get_user_data(conn: asyncpg.Connection, id: int) -> dict[str, Any]:
 
 
 @router.get("/", response_model=list[UserResponse])
-async def get_users(request: Request) -> list[dict[str, Any]]:
+async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[dict[str, Any]]:
     """Get information about all the users stored in the database."""
-    users = await fetch_users(request.state.db_conn)
+    users = await session.execute(select(User.id))
+    users.unique()
 
-    return [await get_user_data(request.state.db_conn, user) for user in users]
+    return [await get_user_data(session, user) for user in users.scalars().all()]
 
 
 @router.get(
