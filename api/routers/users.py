@@ -73,13 +73,12 @@ async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[dic
         }
     }
 )
-async def get_user(request: Request, user_id: int) -> dict[str, Any]:
+async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
     """Get a specific user stored in the database by ID."""
-    db_user = await request.state.db_conn.fetchrow(
-        "SELECT * FROM users WHERE user_id = $1", user_id
-    )
+    user = await session.execute(select(User).where(User.id == user_id))
+    user.unique()
 
-    if not db_user:
+    if not user.scalars().one_or_none():
         raise HTTPException(status_code=404, detail="User with specified ID could not be found.")
 
-    return await get_user_data(request.state.db_conn, user_id)
+    return await get_user_data(session, user_id)
