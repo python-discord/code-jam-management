@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Infraction as DbInfraction
+from api.database import Infraction as DbInfraction, Jam, User
 from api.dependencies import get_db_session
 from api.models import Infraction, InfractionResponse
 
@@ -49,26 +49,28 @@ async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get
         }
     }
 )
-async def create_infraction(request: Request, infraction: Infraction) -> dict[str, Any]:
+async def create_infraction(infraction: Infraction, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
     """Add an infraction for a user to the database."""
-    jam_id = await request.state.db_conn.fetchval(
-        "SELECT jam_id FROM jams WHERE jam_id = $1", infraction.jam_id
-    )
+    jam_id = (await session.execute(select(Jam.id).where(Jam.id == infraction.jam_id))).scalars().one_or_none()
 
     if jam_id is None:
         raise HTTPException(404, "Jam with specified ID could not be found.")
 
-    user_id = await request.state.db_conn.fetchval(
-        "SELECT user_id FROM users WHERE user_id = $1", infraction.user_id
-    )
+    user_id = (await session.execute(select(User.id).where(User.id == infraction.user_id))).scalars().one_or_none()
 
     if user_id is None:
         raise HTTPException(404, "User with specified ID could not be found.")
 
-    infraction_id = await request.state.db_conn.fetchval(
-        "INSERT INTO infractions (user_id, jam_id, infraction_type, reason)"
-        "VALUES ($1, $2, $3, $4) RETURNING infraction_id",
-        user_id, jam_id, infraction.infraction_type, infraction.reason
+    infraction = DbInfraction(
+        user_id=user_id,
+        jam_id=jam_id,
+        infraction_type=infraction.infraction_type,
+        reason=infraction.reason
     )
+    session.add(infraction)
+    await session.flush()
 
-    return await get_infraction(request, infraction_id)
+    infraction_result = await session.execute(select(DbInfraction).where(DbInfraction.id == infraction.id))
+    infraction_result.unique()
+
+    return infraction_result.scalars().one()
