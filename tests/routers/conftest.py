@@ -1,24 +1,27 @@
 """Fixtures for tests of the `routers` package."""
-import asyncpg
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from api import models
+from api.database import Jam, Team, TeamUser, User
 
 
-async def delete_jam(jam: models.CodeJamResponse, db: asyncpg.Connection) -> None:
+async def delete_jam(jam: models.CodeJamResponse, session: AsyncSession) -> None:
     """Delete a jam and related contents from the database."""
     # Clean up the database. Ideally, this would have a `ON CASCADE`
     # delete on the database foreign keys, which would simplify deletion
     # here. An exercise for the reader!
     for team in jam.teams:
-        await db.execute("DELETE FROM team_has_user WHERE team_id = $1", team.team_id)
+        await session.execute(delete(TeamUser).where(TeamUser.team_id == team.id))
 
     # As we do not have a filter we can apply here, the table is checked for
     # being empty at the caller site.
-    await db.execute("DELETE FROM users")
-    await db.execute("DELETE FROM teams WHERE jam_id = $1", jam.jam_id)
-    await db.execute("DELETE FROM jams WHERE jam_id = $1", jam.jam_id)
+    await session.execute(delete(User))
+    await session.execute(delete(Team).where(Team.jam_id == jam.id))
+    await session.execute(delete(Jam).where(Jam.id == jam.id))
 
 
 @pytest.fixture(scope='session')
@@ -40,11 +43,11 @@ def codejam() -> models.CodeJam:
 
 @pytest.fixture
 async def created_codejam(
-    client: AsyncClient, codejam: models.CodeJam, testdbconn: asyncpg.Connection
+    client: AsyncClient, codejam: models.CodeJam, session: AsyncSession
 ) -> models.CodeJam:
     """Create the codejam via the API and yield it."""
     # Ensure no users are in the database.
-    current_users = await testdbconn.fetchval("SELECT count(*) FROM users")
+    current_users = len((await session.execute(select(User))).unique().scalars().all())
     assert current_users == 0, "Users table is pre-populated"
 
     # Create the codejam and parse it into the expected
@@ -58,4 +61,4 @@ async def created_codejam(
     try:
         yield parsed
     finally:
-        await delete_jam(parsed, testdbconn)
+        await delete_jam(parsed, session)

@@ -43,4 +43,4 @@ async def test_get_users_from_existing_jam(
             assert response.status_code == 200
             raw = response.json()
             parsed = models.UserResponse(**raw)
-            assert parsed.user_id == user.user_id
+            assert parsed.id == user.user_id

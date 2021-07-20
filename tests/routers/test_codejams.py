@@ -21,16 +21,19 @@ async def test_list_codejams_without_db_entries(client: AsyncClient) -> None:
 async def test_get_nonexistent_code_jam(client: AsyncClient) -> None:
     """Getting a nonexistent code jam should return a 404."""
     response = await client.get('/codejams/41902')
+    print(response)
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
 async def test_get_existing_code_jam(client: AsyncClient, created_codejam: models.CodeJamResponse) -> None:
     """Getting an existing code jam should return 200."""
-    response = await client.get(f'/codejams/{created_codejam.jam_id}')
+    response = await client.get(f'/codejams/{created_codejam.id}')
+    print(response)
     assert response.status_code == 200
     raw = response.json()
     jam = models.CodeJamResponse(**raw)
+    print(jam)
     assert jam == created_codejam
 
 
@@ -38,12 +41,14 @@ async def test_get_existing_code_jam(client: AsyncClient, created_codejam: model
 async def test_list_codejams_with_existing_jam(client: AsyncClient, created_codejam: models.CodeJamResponse) -> None:
     """Listing all code jams should return the created jam."""
     response = await client.get('/codejams')
+    print(response)
     assert response.status_code == 200
     raw = response.json()
 
     # We should only have a single jam here.
     # Pattern match to make sure that is true.
     [jam] = [models.CodeJamResponse(**jam) for jam in raw]
+    print(jam)
 
     # Ensure the code jam in the "single jam" endpoint matches the
     # code jam we get returned from the API here.
