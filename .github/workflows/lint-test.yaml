@@ -112,7 +112,7 @@ jobs:
       - name: Run tests and generate coverage report
         env:
             # DB for the tests to connect to
-            DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+            DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
         run: |
             python -Wignore -m coverage run -m pytest
             coverage report -m
