@@ -1,11 +1,11 @@
 from typing import Any
 
 import asyncpg
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import User, TeamUser, Infraction
+from api.database import TeamUser, User
 from api.dependencies import get_db_session
 from api.models import UserResponse
 

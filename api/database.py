@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Integer, Text, PrimaryKeyConstraint
+from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Integer, PrimaryKeyConstraint, Text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, Team, User, TeamUser
+from api.database import Jam, Team, TeamUser, User
 from api.dependencies import get_db_session
 from api.models import CodeJam, CodeJamResponse
 
