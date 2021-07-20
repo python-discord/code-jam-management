@@ -7,11 +7,12 @@ services:
             POSTGRES_DB: codejam_management
             POSTGRES_PASSWORD: codejam_management
             POSTGRES_USER: codejam_management
-        volumes:
-            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     api:
         build: .
         restart: always
+        volumes:
+            - ./alembic/versions:/app/alembic/versions
+            - .:/app:ro
         environment:
             DATABASE_URL: postgresql+asyncpg://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
