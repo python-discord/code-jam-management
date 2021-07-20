@@ -1,7 +1,7 @@
 """Create tables
 
 Revision ID: 103ccfde4460
-Revises: 
+Revises:
 Create Date: 2021-07-19 11:13:00.072173
 
 """
