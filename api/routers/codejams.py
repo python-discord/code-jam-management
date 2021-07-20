@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +12,7 @@ router = APIRouter(prefix="/codejams", tags=["codejams"])
 
 
 @router.get("/", response_model=list[CodeJamResponse])
-async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[dict[str, Any]]:
+async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[Jam]:
     """Get all the codejams stored in the database."""
     codejams = await session.execute(select(Jam).order_by(desc(Jam.id)))
     codejams.unique()
@@ -31,7 +29,7 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
         }
     }
 )
-async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> Jam:
     """Get a specific codejam stored in the database by ID."""
     jam_result = await session.execute(select(Jam).where(Jam.id == codejam_id))
     jam_result.unique()
@@ -43,7 +41,7 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
 
 
 @router.post("/", response_model=CodeJamResponse)
-async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> Jam:
     """Create a new codejam and get back the one just created."""
     jam = Jam(name=codejam.name)
     session.add(jam)

@@ -1,6 +1,4 @@
-from typing import Any
-
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -12,7 +10,7 @@ router = APIRouter(prefix="/infractions", tags=["infractions"])
 
 
 @router.get("/", response_model=list[InfractionResponse])
-async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[dict[str, Any]]:
+async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[DbInfraction]:
     """Get every the infraction stored in the database."""
     infractions = await session.execute(select(DbInfraction))
     infractions.unique()
@@ -29,7 +27,7 @@ async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> li
         }
     }
 )
-async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
     """Get a specific infraction stored in the database by ID."""
     infraction_result = await session.execute(select(DbInfraction).where(DbInfraction.id == infraction_id))
     infraction_result.unique()
@@ -49,7 +47,7 @@ async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get
         }
     }
 )
-async def create_infraction(infraction: Infraction, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def create_infraction(infraction: Infraction, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
     """Add an infraction for a user to the database."""
     jam_id = (await session.execute(select(Jam.id).where(Jam.id == infraction.jam_id))).scalars().one_or_none()
 
