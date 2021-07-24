@@ -37,4 +37,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.taskipy.tasks]
 lint = "pre-commit run --all-files"
 precommit = "pre-commit install"
-webserver = "uvicorn main:app"
+webserver = "uvicorn api.main:app"
