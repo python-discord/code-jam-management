@@ -12,6 +12,8 @@ services:
     api:
         build: .
         restart: always
+        read_only: true  # Prod uses a read-only fs, override this locally if it helps with debugging
+        user: "1000"  # Prod uses a non-root user, override this locally if it helps with debugging
         environment:
             DATABASE_URL: postgres://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
