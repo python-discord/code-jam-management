@@ -1,5 +1,10 @@
 FROM python:3.9-slim
 
+# Set pip to have no saved cache
+# No poetry venv since we run as non-root user in prod
+ENV PIP_NO_CACHE_DIR=false \
+    POETRY_VIRTUALENVS_CREATE=false
+
 WORKDIR /app
 
 RUN pip install poetry
