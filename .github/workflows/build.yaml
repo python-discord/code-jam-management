@@ -93,6 +93,6 @@ jobs:
         uses: Azure/k8s-deploy@v1
         with:
           manifests: |
-            kubernetes/code-jam-management/deployment.yaml
+            kubernetes/namespaces/default/code-jam-management/deployment.yaml
           images: 'ghcr.io/python-discord/code-jam-management:${{ steps.sha_tag.outputs.tag }}'
           kubectl-version: 'latest'
