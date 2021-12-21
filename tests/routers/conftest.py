@@ -24,7 +24,7 @@ async def delete_jam(jam: models.CodeJamResponse, session: AsyncSession) -> None
     await session.execute(delete(Jam).where(Jam.id == jam.id))
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def codejam() -> models.CodeJam:
     """Build a codejam for test purposes."""
     return models.CodeJam(
@@ -57,8 +57,5 @@ async def created_codejam(
     assert response.status_code == 200, "Failed to create test codejam"
     created_jam = response.json()
     parsed = models.CodeJamResponse(**created_jam)
-
-    try:
-        yield parsed
-    finally:
-        await delete_jam(parsed, session)
+    yield parsed
+    await delete_jam(parsed, session)

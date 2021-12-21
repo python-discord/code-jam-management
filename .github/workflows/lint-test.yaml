@@ -106,13 +106,6 @@ jobs:
       - name: Run flake8
         run: "flake8 \
         --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'"
-
-      # Run migrations on DB to run tests.
-      - name: Run migrations
-        env:
-            DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
-        run: poetry run alembic upgrade head
-
       # We run `coverage` using the `python` command so we can suppress
       # irrelevant warnings in our CI output.
       - name: Run tests and generate coverage report

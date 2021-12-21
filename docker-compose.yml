@@ -3,6 +3,8 @@ version: "3.7"
 services:
     postgres:
         image: postgres:13-alpine
+        ports:
+            - "127.0.0.1:7777:5432"
         environment:
             POSTGRES_DB: codejam_management
             POSTGRES_PASSWORD: codejam_management
