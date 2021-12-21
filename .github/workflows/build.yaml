@@ -61,38 +61,38 @@ jobs:
           build-args: |
             git_sha=${{ github.sha }}
 
-  # deploy:
-  #   needs: build
-  #   name: Deploy
-  #   runs-on: ubuntu-latest
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     # Create a commit SHA-based tag for the container repositories
-  #     - name: Create SHA Container Tag
-  #       id: sha_tag
-  #       run: |
-  #         tag=$(cut -c 1-7 <<< $GITHUB_SHA)
-  #         echo "::set-output name=tag::$tag"
+    steps:
+      # Create a commit SHA-based tag for the container repositories
+      - name: Create SHA Container Tag
+        id: sha_tag
+        run: |
+          tag=$(cut -c 1-7 <<< $GITHUB_SHA)
+          echo "::set-output name=tag::$tag"
 
-  #     # Check out the private "kubernetes" repository in the `kubernetes`
-  #     # subdirectory using a GitHub Personal Access Token
-  #     - name: Checkout Kubernetes Repository
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: python-discord/kubernetes
-  #         token: ${{ secrets.REPO_TOKEN }}
-  #         path: kubernetes
+      # Check out the private "kubernetes" repository in the `kubernetes`
+      # subdirectory using a GitHub Personal Access Token
+      - name: Checkout Kubernetes Repository
+        uses: actions/checkout@v2
+        with:
+          repository: python-discord/kubernetes
+          token: ${{ secrets.REPO_TOKEN }}
+          path: kubernetes
 
-  #     - name: Authenticate with Kubernetes
-  #       uses: azure/k8s-set-context@v1
-  #       with:
-  #         method: kubeconfig
-  #         kubeconfig: ${{ secrets.KUBECONFIG }}
+      - name: Authenticate with Kubernetes
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
 
-  #     - name: Deploy to Kubernetes
-  #       uses: Azure/k8s-deploy@v1
-  #       with:
-  #         manifests: |
-  #           kubernetes/code-jam-management/deployment.yaml
-  #         images: 'ghcr.io/python-discord/code-jam-management:${{ steps.sha_tag.outputs.tag }}'
-  #         kubectl-version: 'latest'
+      - name: Deploy to Kubernetes
+        uses: Azure/k8s-deploy@v1
+        with:
+          manifests: |
+            kubernetes/namespaces/default/code-jam-management/deployment.yaml
+          images: 'ghcr.io/python-discord/code-jam-management:${{ steps.sha_tag.outputs.tag }}'
+          kubectl-version: 'latest'

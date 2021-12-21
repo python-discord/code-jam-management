@@ -1,6 +1,9 @@
-FROM python:3.9-slim
+FROM --platform=linux/amd64 python:3.9-slim
 
-RUN apt update && apt install -y git
+# Set pip to have no saved cache
+# No poetry venv since we run as non-root user in prod
+ENV PIP_NO_CACHE_DIR=false \
+    POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 
