@@ -9,6 +9,11 @@ class User(BaseModel):
     user_id: int
     is_leader: bool
 
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
+
 
 class Team(BaseModel):
     """A model representing a team for a codejam."""
@@ -47,17 +52,32 @@ class Winner(BaseModel):
     user_id: int
     first_place: bool
 
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
+
 
 class TeamResponse(Team):
     """Response model representing a team."""
 
-    team_id: int
+    id: int
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
 
 
 class InfractionResponse(Infraction):
     """Reponse model representing an infraction."""
 
-    infraction_id: int
+    id: int
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
 
 
 class ParticipationHistory(BaseModel):
@@ -70,18 +90,33 @@ class ParticipationHistory(BaseModel):
     is_leader: bool
     infractions: list[InfractionResponse]
 
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
+
 
 class UserResponse(BaseModel):
     """Response model representing a user."""
 
-    user_id: int
+    id: int
     participation_history: list[ParticipationHistory]
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
 
 
 class CodeJamResponse(CodeJam):
     """Response model representing a code jam."""
 
-    jam_id: int
+    id: int
     teams: list[TeamResponse]
     infractions: list[InfractionResponse]
     winners: list[Winner]
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True

@@ -3,18 +3,21 @@ version: "3.7"
 services:
     postgres:
         image: postgres:13-alpine
+        ports:
+            - "127.0.0.1:7777:5432"
         environment:
             POSTGRES_DB: codejam_management
             POSTGRES_PASSWORD: codejam_management
             POSTGRES_USER: codejam_management
-        volumes:
-            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     api:
         build: .
         restart: always
+        volumes:
+            - ./alembic/versions:/app/alembic/versions
+            - .:/app:ro
         read_only: true  # Prod uses a read-only fs, override this locally if it helps with debugging
         user: "1000"  # Prod uses a non-root user, override this locally if it helps with debugging
         environment:
-            DATABASE_URL: postgres://codejam_management:codejam_management@postgres:5432/codejam_management
+            DATABASE_URL: postgresql+asyncpg://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
             - 5000:5000
