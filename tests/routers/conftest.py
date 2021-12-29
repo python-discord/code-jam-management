@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from fastapi import FastAPI
 
 from api import models
 from api.database import Jam, Team, TeamUser, User

@@ -2,8 +2,11 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from api import models
+from api.database import User
 
 pytestmark = pytest.mark.asyncio
 
@@ -47,3 +50,17 @@ async def test_list_codejams_with_existing_jam(client: AsyncClient, created_code
     # Ensure the code jam in the "single jam" endpoint matches the
     # code jam we get returned from the API here.
     assert jam == created_codejam
+
+async def test_create_codejams_rejects_invalid_data(client: AsyncClient, app: FastAPI):
+    response = await client.post(app.url_path_for("create_codejam"), json={"name": "test"})
+    assert response.status_code == 422
+
+async def test_create_codejams_accepts_valid_data_and_creates_user(client: AsyncClient, app: FastAPI, session: AsyncSession):
+    response = await client.post(app.url_path_for("create_codejam"), json={
+        "name": "CodeJam Test",
+        "teams": [{"name": "Dramatic Dragonflies", "users": [{"user_id": 1, "is_leader": True}]}]
+    })
+    assert response.status_code == 200
+
+    # Checks whether the previously added user was actually inserted into the database.
+    assert (await session.execute(select(User).where(User.id == 1))).scalars().unique().one_or_none()
