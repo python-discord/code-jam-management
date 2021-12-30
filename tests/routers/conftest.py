@@ -74,7 +74,7 @@ async def created_infraction(
     jam_id = created_codejam.id
     response = await client.post(
         app.url_path_for("create_infraction"),
-        json={"user_id": user_id, "jam_id": jam_id, "reason": "To good to be true", "infraction_type": "warning"}
+        json={"user_id": user_id, "jam_id": jam_id, "reason": "Too good to be true", "infraction_type": "warning"}
     )
     parsed_infraction = models.InfractionResponse(**response.json())
     assert response.status_code == 200
