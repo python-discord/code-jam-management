@@ -1,13 +1,13 @@
 """Fixtures for tests of the `routers` package."""
 import pytest
+from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from fastapi import FastAPI
 
 from api import models
-from api.database import Jam, Team, TeamUser, User
+from api.database import Infraction, Jam, Team, TeamUser, User
 
 
 async def delete_jam(jam: models.CodeJamResponse, session: AsyncSession) -> None:
@@ -59,4 +59,27 @@ async def created_codejam(
     created_jam = response.json()
     parsed = models.CodeJamResponse(**created_jam)
     yield parsed
-    await delete_jam(parsed, session)
+
+
+@pytest.fixture
+async def created_infraction(
+        client: AsyncClient,
+        app: FastAPI,
+        session: AsyncSession,
+        created_codejam: models.CodeJamResponse
+) -> models.InfractionResponse:
+    """Create a test Infraction via the API and yield it."""
+    # Select one of the test users, so that we can issue an infraction to that user
+    user_id = created_codejam.teams[0].users[0].user_id
+    jam_id = created_codejam.id
+    response = await client.post(
+        app.url_path_for("create_infraction"),
+        json={"user_id": user_id, "jam_id": jam_id, "reason": "To good to be true", "infraction_type": "warning"}
+    )
+    parsed_infraction = models.InfractionResponse(**response.json())
+    assert response.status_code == 200
+    # Check whether the infraction was actually created, and insterted into the db
+    assert (
+        await (session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id)))
+    ).unique().scalars().one_or_none(), "Failed to create Infraction"
+    yield parsed_infraction

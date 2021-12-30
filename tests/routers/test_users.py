@@ -1,7 +1,7 @@
 """Tests for the users router."""
 import pytest
-from httpx import AsyncClient
 from fastapi import FastAPI
+from httpx import AsyncClient
 
 from api import models
 
@@ -23,7 +23,11 @@ async def test_get_nonexistent_user(client: AsyncClient, app: FastAPI) -> None:
     assert response.status_code == 404
 
 
-async def test_list_users_with_existing_jam(client: AsyncClient, created_codejam: models.CodeJamResponse, app: FastAPI) -> None:
+async def test_list_users_with_existing_jam(
+        client: AsyncClient,
+        created_codejam: models.CodeJamResponse,
+        app: FastAPI
+) -> None:
     """Listing users with an existing jam should display the users in the jam."""
     response = await client.get(app.url_path_for("get_users"))
     assert response.status_code == 200
