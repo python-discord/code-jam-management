@@ -9,15 +9,26 @@ services:
             POSTGRES_DB: codejam_management
             POSTGRES_PASSWORD: codejam_management
             POSTGRES_USER: codejam_management
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U codejam_management" ]
+            interval: 2s
+            timeout: 1s
+            retries: 5
     api:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: development
         restart: always
         volumes:
             - ./alembic/versions:/app/alembic/versions
             - .:/app:ro
+        depends_on:
+            postgres:
+                condition: service_healthy
         read_only: true  # Prod uses a read-only fs, override this locally if it helps with debugging
         user: "1000"  # Prod uses a non-root user, override this locally if it helps with debugging
         environment:
             DATABASE_URL: postgresql+asyncpg://codejam_management:codejam_management@postgres:5432/codejam_management
         ports:
-            - 5000:5000
+            - 5000:8000
