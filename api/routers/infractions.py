@@ -11,7 +11,7 @@ router = APIRouter(prefix="/infractions", tags=["infractions"])
 
 @router.get("/", response_model=list[InfractionResponse])
 async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[DbInfraction]:
-    """Get every the infraction stored in the database."""
+    """Get every infraction stored in the database."""
     infractions = await session.execute(select(DbInfraction))
     infractions.unique()
 
