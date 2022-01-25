@@ -47,3 +47,23 @@ async def test_get_users_from_existing_jam(
             raw = response.json()
             parsed = models.UserResponse(**raw)
             assert parsed.id == user.user_id
+
+
+async def test_create_user_without_db_entries(client: AsyncClient, app: FastAPI) -> None:
+    """Creating a user should return a 200."""
+    response = await client.post(app.url_path_for("create_user", user_id=1234))
+    assert response.status_code == 200
+    user = response.json()
+    assert user["id"] == 1234
+
+
+async def test_create_user_existing_user(
+        client: AsyncClient,
+        created_codejam: models.CodeJamResponse,
+        app: FastAPI
+) -> None:
+    """Creating a user with an existing user should return a 400."""
+    user = created_codejam.teams[0].users[0]
+
+    response = await client.post(app.url_path_for("create_user", user_id=user.user_id))
+    assert response.status_code == 400

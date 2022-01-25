@@ -82,3 +82,27 @@ async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)
         raise HTTPException(status_code=404, detail="User with specified ID could not be found.")
 
     return await get_user_data(session, user_id)
+
+
+@router.post(
+    "/{user_id}",
+    response_model=UserResponse,
+    responses={
+        400: {
+            "description": "User already exists."
+        }
+    }
+)
+async def create_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+    """Create a new user with the specified ID to the database."""
+    user = await session.execute(select(User).where(User.id == user_id))
+    user.unique()
+
+    if user.scalars().one_or_none():
+        raise HTTPException(status_code=400, detail="User with specified ID already exists.")
+
+    user = User(id=user_id)
+    session.add(user)
+    await session.flush()
+
+    return await get_user_data(session, user_id)
