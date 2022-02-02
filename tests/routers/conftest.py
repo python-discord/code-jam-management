@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from api import models
-from api.database import Infraction, Jam, Team, TeamUser, User
+from api.database import Infraction, Jam, Team, TeamUser, User, Winner
 
 
 async def delete_jam(jam: models.CodeJamResponse, session: AsyncSession) -> None:
@@ -83,3 +83,30 @@ async def created_infraction(
         await (session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id)))
     ).unique().scalars().one_or_none(), "Failed to create Infraction"
     yield parsed_infraction
+
+
+@pytest.fixture
+async def created_winner(
+    client: AsyncClient,
+    app: FastAPI,
+    session: AsyncSession,
+    created_codejam: models.CodeJamResponse
+) -> models.WinnerResponse:
+    """Create a single test Winner via the API and yield it."""
+    # Select a test user, so that we can use it to create the winner
+    user_id = created_codejam.teams[0].users[0].user_id
+    jam_id = created_codejam.id
+    response = await client.post(
+        app.url_path_for("create_winners", jam_id=jam_id),
+        json=[{"user_id": user_id, "first_place": True}]
+    )
+
+    assert response.status_code == 200
+    [raw_winner] = response.json()  # There should be exactly one winner
+    parsed_winner = models.WinnerResponse(**raw_winner)
+
+    assert (
+        await session.execute(select(Winner).where(Winner.user_id == parsed_winner.user_id))
+    ).unique().scalars().one_or_none(), "Failed to create Winner"
+
+    yield parsed_winner

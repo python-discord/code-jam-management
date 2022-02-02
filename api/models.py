@@ -58,6 +58,12 @@ class Winner(BaseModel):
         orm_mode = True
 
 
+class WinnerResponse(Winner):
+    """Response model representing a codejam winner."""
+
+    jam_id: int
+
+
 class TeamResponse(Team):
     """Response model representing a team."""
 
