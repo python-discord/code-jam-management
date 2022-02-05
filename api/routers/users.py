@@ -1,6 +1,5 @@
 from typing import Any
 
-import asyncpg
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,16 +10,6 @@ from api.models import UserResponse
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-async def fetch_users(conn: asyncpg.Connection) -> list[int]:
-    """Fetch all the users stored in the database."""
-    return [
-        user[0]
-        for user in await conn.fetch(
-            "SELECT user_id FROM users"
-        )
-    ]
 
 
 async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
