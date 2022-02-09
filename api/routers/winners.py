@@ -78,7 +78,7 @@ async def create_winners(
     )
     db_winners.unique()
 
-    if db_winners.scalars().one_or_none():
+    if db_winners.scalars().all():
         raise HTTPException(409, "Some winners already exist in the database.")
 
     winners_response = []
