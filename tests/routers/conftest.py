@@ -63,10 +63,10 @@ async def created_codejam(
 
 @pytest.fixture
 async def created_infraction(
-        client: AsyncClient,
-        app: FastAPI,
-        session: AsyncSession,
-        created_codejam: models.CodeJamResponse
+    client: AsyncClient,
+    app: FastAPI,
+    session: AsyncSession,
+    created_codejam: models.CodeJamResponse
 ) -> models.InfractionResponse:
     """Create a test Infraction via the API and yield it."""
     # Select one of the test users, so that we can issue an infraction to that user

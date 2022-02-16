@@ -24,9 +24,9 @@ async def test_get_nonexistent_user(client: AsyncClient, app: FastAPI) -> None:
 
 
 async def test_list_users_with_existing_jam(
-        client: AsyncClient,
-        created_codejam: models.CodeJamResponse,
-        app: FastAPI
+    client: AsyncClient,
+    created_codejam: models.CodeJamResponse,
+    app: FastAPI
 ) -> None:
     """Listing users with an existing jam should display the users in the jam."""
     response = await client.get(app.url_path_for("get_users"))
@@ -37,7 +37,7 @@ async def test_list_users_with_existing_jam(
 
 
 async def test_get_users_from_existing_jam(
-        client: AsyncClient, codejam: models.CodeJam, created_codejam: models.CodeJamResponse, app: FastAPI
+    client: AsyncClient, codejam: models.CodeJam, created_codejam: models.CodeJamResponse, app: FastAPI
 ) -> None:
     """Getting users from an existing jam should return the users properly."""
     for team in codejam.teams:
@@ -58,9 +58,9 @@ async def test_create_user_without_db_entries(client: AsyncClient, app: FastAPI)
 
 
 async def test_create_user_existing_user(
-        client: AsyncClient,
-        created_codejam: models.CodeJamResponse,
-        app: FastAPI
+    client: AsyncClient,
+    created_codejam: models.CodeJamResponse,
+    app: FastAPI
 ) -> None:
     """Creating a user with an existing user should return a 400."""
     user = created_codejam.teams[0].users[0]
