@@ -59,6 +59,9 @@ async def test_list_codejams_with_existing_jam(
     # code jam we get returned from the API here.
     assert jam == created_codejam
 
+    # Ensure the code jam has the ongoing key and it is set to false by default.
+    assert jam.ongoing is False
+
 
 async def test_create_codejams_rejects_invalid_data(client: AsyncClient, app: FastAPI) -> None:
     """Posting invalid JSON data should return 422."""
@@ -73,6 +76,7 @@ async def test_create_codejams_accepts_valid_data_and_creates_user(
     """Posting a valid JSON data should return 200 and the record should exitst in the DB."""
     response = await client.post(app.url_path_for("create_codejam"), json={
         "name": "CodeJam Test",
+        "ongoing": True,
         "teams": [{"name": "Dramatic Dragonflies", "users": [{"user_id": 1, "is_leader": True}]}]
     })
     assert response.status_code == 200

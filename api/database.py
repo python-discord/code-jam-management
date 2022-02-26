@@ -45,6 +45,7 @@ class Jam(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(Text, nullable=False)
+    ongoing = Column(Boolean, nullable=False, server_default="false")
 
     teams = relationship("Team", back_populates="jam", lazy="joined")
     winners = relationship("Winner", back_populates="jam", lazy="joined")

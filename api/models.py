@@ -27,6 +27,7 @@ class CodeJam(BaseModel):
 
     name: str
     teams: list[Team]
+    ongoing: bool = False
 
 
 class InfractionType(str, Enum):
