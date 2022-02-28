@@ -30,6 +30,7 @@ def codejam() -> models.CodeJam:
     """Build a codejam for test purposes."""
     return models.CodeJam(
         name='Python Discord Test Jam 1 - Break your coverage!',
+        ongoing=True,
         teams=[
             models.Team(
                 name='lemoncluster 1',

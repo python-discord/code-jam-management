@@ -1,5 +1,7 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import desc
+from sqlalchemy import desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -25,12 +27,27 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
     response_model=CodeJamResponse,
     responses={
         404: {
-            "description": "CodeJam could not be found."
+            "description": "CodeJam could not be found or there is no ongoing code jam."
         }
     }
 )
 async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> Jam:
-    """Get a specific codejam stored in the database by ID."""
+    """
+    Get a specific codejam stored in the database by ID.
+
+    Passing -1 as the codejam ID will return the ongoing codejam.
+    """
+    if codejam_id == -1:
+        ongoing_jams = (
+            await session.execute(select(Jam).where(Jam.ongoing == True))
+        ).unique().scalars().all()
+
+        if not ongoing_jams:
+            raise HTTPException(status_code=404, detail="There is no ongoing codejam.")
+
+        # With the current implementation, there should only be one ongoing codejam.
+        return ongoing_jams[0]
+
     jam_result = await session.execute(select(Jam).where(Jam.id == codejam_id))
     jam_result.unique()
 
@@ -40,10 +57,54 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
     return jam
 
 
+@router.patch(
+    "/{codejam_id}",
+    responses={
+        404: {
+            "description": "Code Jam with specified ID does not exist."
+        }
+    }
+)
+async def modify_codejam(
+    codejam_id: int,
+    name: Optional[str] = None,
+    ongoing: Optional[bool] = None,
+    session: AsyncSession = Depends(get_db_session)
+) -> None:
+    """Modify the specified codejam to change its name and/or whether it's the ongoing code jam."""
+    codejam = await session.execute(select(Jam).where(Jam.id == codejam_id))
+    codejam.unique()
+
+    if not codejam.scalars().one_or_none():
+        raise HTTPException(status_code=404, detail="Code Jam with specified ID does not exist.")
+
+    if name is not None:
+        await session.execute(update(Jam).where(Jam.id == codejam_id).values(name=name))
+
+    if ongoing is not None:
+        # Make sure no other Jams are ongoing, and set the specified codejam to ongoing.
+        await session.execute(update(Jam).where(Jam.ongoing == True).values(ongoing=False))
+        await session.execute(update(Jam).where(Jam.id == codejam_id).values(ongoing=True))
+
+    jam_result = await session.execute(select(Jam).where(Jam.id == codejam_id))
+    jam_result.unique()
+
+    jam = jam_result.scalars().one()
+
+    return jam
+
+
 @router.post("/", response_model=CodeJamResponse)
 async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> Jam:
-    """Create a new codejam and get back the one just created."""
-    jam = Jam(name=codejam.name)
+    """
+    Create a new codejam and get back the one just created.
+
+    If the codejam is ongoing, all other codejams will be set to not be ongoing.
+    """
+    if codejam.ongoing:
+        await session.execute(update(Jam).where(Jam.ongoing == True).values(ongoing=False))
+
+    jam = Jam(name=codejam.name, ongoing=codejam.ongoing)
     session.add(jam)
     # Flush here to receive jam ID
     await session.flush()
