@@ -39,6 +39,13 @@ def codejam() -> models.CodeJam:
                     models.User(user_id=109248, is_leader=False),
                 ]
             ),
+            models.Team(
+                name='lemoncluster 2',
+                users=[
+                    models.User(user_id=298, is_leader=False),
+                    models.User(user_id=2180, is_leader=True),
+                ]
+            ),
         ]
     )
 

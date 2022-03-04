@@ -69,6 +69,7 @@ class TeamResponse(Team):
     """Response model representing a team."""
 
     id: int
+    jam_id: int
 
     class Config:
         """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
