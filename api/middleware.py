@@ -8,7 +8,7 @@ from starlette.authentication import (
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from api.constants import DEBUG
+from api.constants import Config
 
 NO_AUTHORIZATION_HEADER = "no `Authorization` header in request."
 INVALID_CREDENTIALS = "invalid credentials."
@@ -24,7 +24,7 @@ class TokenAuthentication(AuthenticationBackend):
             self, request: Request
     ) -> tuple[AuthCredentials, SimpleUser]:
         """Authenticate the request based on the Authorization header."""
-        if DEBUG:
+        if Config.DEBUG:
             credentials = AuthCredentials(scopes=["debug"])
             user = SimpleUser(username="api_client")
             return credentials, user
