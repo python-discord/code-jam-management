@@ -112,6 +112,7 @@ jobs:
         env:
             # DB for the tests to connect to
             DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
+            DEBUG: True
         run: |
             python -Wignore -m coverage run -m pytest
             coverage report -m

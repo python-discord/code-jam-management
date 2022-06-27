@@ -7,7 +7,7 @@ ENV PIP_NO_CACHE_DIR=false \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     POETRY_HOME="/opt/poetry" \
     INSTALL_DIR="/opt/dependencies" \
-    APP_DIR="/api" \
+    APP_DIR="/app" \
     POETRY_NO_INTERACTION=1
 
 ENV PATH="$POETRY_HOME/bin:$INSTALL_DIR/.venv/bin:$PATH"
