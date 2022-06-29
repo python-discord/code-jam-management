@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import TeamUser, User
+from api.database import Jam, TeamUser, User
 from api.dependencies import get_db_session
-from api.models import UserResponse
+from api.models import UserResponse, UserTeamResponse
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -95,3 +95,50 @@ async def create_user(user_id: int, session: AsyncSession = Depends(get_db_sessi
     await session.flush()
 
     return await get_user_data(session, user_id)
+
+
+@router.get(
+    "/{user_id}/current",
+    response_model=UserTeamResponse,
+    responses={
+        404: {
+            "description": (
+                "User not found, "
+                "there is no ongoing code jam or "
+                "user isn't participating in current code jam."
+            )
+        }
+    }
+)
+async def get_current_team(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+    """Get a user's current team information."""
+    user = await session.execute(select(User).where(User.id == user_id))
+    user.unique()
+
+    if not user.scalars().one_or_none():
+        raise HTTPException(status_code=404, detail="User with specified ID could not be found.")
+
+    ongoing_jam = (
+        await session.execute(select(Jam).where(Jam.ongoing == True))
+    ).unique().scalars().one_or_none()
+
+    if not ongoing_jam:
+        raise HTTPException(status_code=404, detail="There is no ongoing codejam.")
+
+    user_teams = (
+        await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))
+    ).unique().scalars().all()
+
+    current_team = None
+    for user_team in user_teams:
+        if user_team.team.jam_id == ongoing_jam.id:
+            current_team = user_team
+            break
+
+    if not current_team:
+        raise HTTPException(
+            status_code=404,
+            detail="User with specified ID isn't participating in ongoing codejam."
+        )
+
+    return current_team
