@@ -76,7 +76,7 @@ async def test_get_current_team_no_ongoing_jam(
     """Getting current team without ongoing jam should return code 404."""
     await client.post(app.url_path_for("create_user", user_id=1234))
 
-    response = await client.post(app.url_path_for("get_current_team", user_id=1234))
+    response = await client.get(app.url_path_for("get_current_team", user_id=1234))
     assert response.status_code == 404
 
 
@@ -85,7 +85,7 @@ async def test_get_current_team_user_not_found(
     app: FastAPI
 ) -> None:
     """Getting current team with unknown user ID should return code 404."""
-    response = await client.post(app.url_path_for("get_current_team", user_id=1234))
+    response = await client.get(app.url_path_for("get_current_team", user_id=1234))
     assert response.status_code == 404
 
 
@@ -99,14 +99,14 @@ async def test_get_current_team_user_not_participating(
     user = team.users[0]
 
     # Check does the request work initially, before removing user from team
-    response = await client.post(app.url_path_for("get_current_team", user_id=user.user_id))
+    response = await client.get(app.url_path_for("get_current_team", user_id=user.user_id))
     assert response.status_code == 200
 
     await client.delete(
         app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id)
     )
 
-    response = await client.post(app.url_path_for("get_current_team", user_id=user.user_id))
+    response = await client.get(app.url_path_for("get_current_team", user_id=user.user_id))
     assert response.status_code == 404
 
 
@@ -119,7 +119,7 @@ async def test_get_current_team_with_participating_user(
     team = created_codejam.teams[0]
     user = team.users[0]
 
-    response = await client.post(app.url_path_for("get_current_team", user_id=user.user_id))
+    response = await client.get(app.url_path_for("get_current_team", user_id=user.user_id))
     assert response.status_code == 200
 
     data = response.json()
