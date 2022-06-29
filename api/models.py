@@ -128,3 +128,16 @@ class CodeJamResponse(CodeJam):
         """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
 
         orm_mode = True
+
+
+class UserTeamResponse(BaseModel):
+    """Response model representing user and team relationship."""
+
+    user_id: int
+    team: TeamResponse
+    is_leader: bool
+
+    class Config:
+        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
+
+        orm_mode = True
