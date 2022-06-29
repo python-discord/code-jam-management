@@ -98,7 +98,7 @@ async def create_user(user_id: int, session: AsyncSession = Depends(get_db_sessi
 
 
 @router.get(
-    "/{user_id}/current",
+    "/{user_id}/current_team",
     response_model=UserTeamResponse,
     responses={
         404: {
