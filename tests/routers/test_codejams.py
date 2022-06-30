@@ -105,7 +105,16 @@ async def test_create_codejams_accepts_valid_data_and_creates_user(
     """Posting a valid JSON data should return 200 and the record should exist in the DB."""
     response = await client.post(app.url_path_for("create_codejam"), json={
         "name": "CodeJam Test",
-        "teams": [{"name": "Dramatic Dragonflies", "users": [{"user_id": 1, "is_leader": True}]}]
+        "teams": [
+            {
+                "name": "Dramatic Dragonflies",
+                "discord_channel_id": 1,
+                "discord_role_id": 1,
+                "users": [
+                    {"user_id": 1, "is_leader": True}
+                ]
+            }
+        ]
     })
     assert response.status_code == 200
 

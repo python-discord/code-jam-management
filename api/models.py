@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -20,6 +21,8 @@ class Team(BaseModel):
 
     name: str
     users: list[User]
+    discord_role_id: Optional[int] = None
+    discord_channel_id: Optional[int] = None
 
 
 class CodeJam(BaseModel):
