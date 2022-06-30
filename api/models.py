@@ -20,6 +20,8 @@ class Team(BaseModel):
 
     name: str
     users: list[User]
+    discord_role_id: int
+    discord_channel_id: int
 
 
 class CodeJam(BaseModel):

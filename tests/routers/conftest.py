@@ -37,14 +37,18 @@ def codejam() -> models.CodeJam:
                 users=[
                     models.User(user_id=1337, is_leader=True),
                     models.User(user_id=109248, is_leader=False),
-                ]
+                ],
+                discord_role_id=1,
+                discord_channel_id=1
             ),
             models.Team(
                 name='lemoncluster 2',
                 users=[
                     models.User(user_id=298, is_leader=False),
                     models.User(user_id=2180, is_leader=True),
-                ]
+                ],
+                discord_role_id=2,
+                discord_channel_id=2
             ),
         ]
     )
@@ -52,7 +56,7 @@ def codejam() -> models.CodeJam:
 
 @pytest.fixture
 async def created_codejam(
-    client: AsyncClient, codejam: models.CodeJam, session: AsyncSession
+        client: AsyncClient, codejam: models.CodeJam, session: AsyncSession
 ) -> models.CodeJam:
     """Create the codejam via the API and yield it."""
     # Ensure no users are in the database.
@@ -71,10 +75,10 @@ async def created_codejam(
 
 @pytest.fixture
 async def created_infraction(
-    client: AsyncClient,
-    app: FastAPI,
-    session: AsyncSession,
-    created_codejam: models.CodeJamResponse
+        client: AsyncClient,
+        app: FastAPI,
+        session: AsyncSession,
+        created_codejam: models.CodeJamResponse
 ) -> models.InfractionResponse:
     """Create a test Infraction via the API and yield it."""
     # Select one of the test users, so that we can issue an infraction to that user
@@ -95,10 +99,10 @@ async def created_infraction(
 
 @pytest.fixture
 async def created_winner(
-    client: AsyncClient,
-    app: FastAPI,
-    session: AsyncSession,
-    created_codejam: models.CodeJamResponse
+        client: AsyncClient,
+        app: FastAPI,
+        session: AsyncSession,
+        created_codejam: models.CodeJamResponse
 ) -> models.WinnerResponse:
     """Create a single test Winner via the API and yield it."""
     # Select a test user, so that we can use it to create the winner

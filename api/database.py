@@ -59,6 +59,8 @@ class Team(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     jam_id = Column(ForeignKey("jams.id"), nullable=False)
     name = Column(Text, nullable=False)
+    discord_role_id = Column(BigInteger, nullable=True)
+    discord_channel_id = Column(BigInteger, nullable=True)
 
     jam = relationship("Jam", back_populates="teams", lazy="joined")
     users = relationship("TeamUser", back_populates="team", lazy="joined")

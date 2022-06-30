@@ -110,7 +110,12 @@ async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_d
     await session.flush()
 
     for raw_team in codejam.teams:
-        team = Team(jam_id=jam.id, name=raw_team.name)
+        team = Team(
+            jam_id=jam.id,
+            name=raw_team.name,
+            discord_role_id=raw_team.discord_role_id,
+            discord_channel_id=raw_team.discord_channel_id
+        )
         session.add(team)
         # Flush here to receive team ID
         await session.flush()
