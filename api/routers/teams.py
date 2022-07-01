@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Team, TeamUser, User as DbUser
+from api.database import Jam, Team, TeamUser, User as DbUser
 from api.dependencies import get_db_session
 from api.models import TeamResponse, User
 
@@ -32,11 +32,14 @@ async def ensure_user_exists(user_id: int, session: AsyncSession) -> DbUser:
 
 
 @router.get("/", response_model=list[TeamResponse])
-async def get_teams(session: AsyncSession = Depends(get_db_session)) -> list[Team]:
+async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(get_db_session)) -> list[Team]:
     """Get every code jam team in the database."""
-    teams = await session.execute(select(Team))
-    teams.unique()
+    if not current_jam:
+        teams = await session.execute(select(Team))
+    else:
+        teams = await session.execute(select(Team).join_from(Team, Jam).where(Jam.ongoing == True))
 
+    teams.unique()
     return teams.scalars().all()
 
 
