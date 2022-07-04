@@ -147,3 +147,34 @@ async def test_remove_nonexisting_team_user(
     )
 
     assert response.status_code == 400
+
+
+async def test_find_nonexisting_team(
+    client: AsyncClient,
+    app: FastAPI
+) -> None:
+    """Getting a non-existing team by name should return 404."""
+    response = await client.get(
+        app.url_path_for("find_team_by_name"),
+        params={"name": "team that should never exist"}
+    )
+
+    assert response.status_code == 404
+
+
+async def test_find_existing_team_case_insensitive(
+    client: AsyncClient,
+    app: FastAPI,
+    created_codejam: models.CodeJamResponse
+) -> None:
+    """Getting an existing team should return 200 and be case-insensitive."""
+    team = created_codejam.teams[0]
+
+    response = await client.get(
+        app.url_path_for("find_team_by_name"),
+        params={"name": team.name.upper()}
+    )
+    assert response.status_code == 200
+
+    parsed = models.TeamResponse(**response.json())
+    assert parsed == team
