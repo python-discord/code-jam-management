@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,9 +55,19 @@ async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(g
         }
     }
 )
-async def find_team_by_name(name: str, session: AsyncSession = Depends(get_db_session)) -> Team:
+async def find_team_by_name(
+    name: str, jam_id: Optional[int] = None, session: AsyncSession = Depends(get_db_session)
+) -> Team:
     """Get a specific code jam team by name."""
-    teams = await session.execute(select(Team).where(func.lower(Team.name) == func.lower(name)))
+    if jam_id is None:
+        teams = await session.execute(
+            select(Team).join(Team.jam).where(func.lower(Team.name) == func.lower(name) and Jam.ongoing == True)
+        )
+    else:
+        teams = await session.execute(
+            select(Team).where((func.lower(Team.name) == func.lower(name)) & (Team.jam_id == jam_id))
+        )
+
     teams.unique()
 
     if not (team := teams.scalars().one_or_none()):
