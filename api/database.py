@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Integer, PrimaryKeyConstraint, Text
+from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Index, Integer, PrimaryKeyConstraint, Text, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -64,6 +64,10 @@ class Team(Base):
 
     jam = relationship("Jam", back_populates="teams", lazy="joined")
     users = relationship("TeamUser", back_populates="team", lazy="joined")
+
+    __table_args__ = (
+        Index('team_name_jam_unique', text("lower(name)"), "jam_id", unique=True),
+    )
 
 
 class Winner(Base):
