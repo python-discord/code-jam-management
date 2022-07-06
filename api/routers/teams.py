@@ -1,4 +1,7 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -41,6 +44,36 @@ async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(g
 
     teams.unique()
     return teams.scalars().all()
+
+
+@router.get(
+    "/find",
+    response_model=TeamResponse,
+    responses={
+        404: {
+            "description": "Team could not be found."
+        }
+    }
+)
+async def find_team_by_name(
+    name: str, jam_id: Optional[int] = None, session: AsyncSession = Depends(get_db_session)
+) -> Team:
+    """Get a specific code jam team by name."""
+    if jam_id is None:
+        teams = await session.execute(
+            select(Team).join(Team.jam).where(func.lower(Team.name) == func.lower(name) and Jam.ongoing == True)
+        )
+    else:
+        teams = await session.execute(
+            select(Team).where((func.lower(Team.name) == func.lower(name)) & (Team.jam_id == jam_id))
+        )
+
+    teams.unique()
+
+    if not (team := teams.scalars().one_or_none()):
+        raise HTTPException(status_code=404, detail="Team with specified name could not be found.")
+
+    return team
 
 
 @router.get(
