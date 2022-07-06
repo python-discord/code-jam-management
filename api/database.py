@@ -64,7 +64,7 @@ class Team(Base):
 
     jam = relationship("Jam", back_populates="teams", lazy="joined")
     users = relationship("TeamUser", back_populates="team", lazy="joined")
-    
+
     __table_args__ = (
         Index('team_name_jam_unique', text("lower(name)"), "jam_id", unique=True),
     )
