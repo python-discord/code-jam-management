@@ -61,7 +61,7 @@ async def find_team_by_name(
     """Get a specific code jam team by name."""
     if jam_id is None:
         teams = await session.execute(
-            select(Team).join(Team.jam).where(func.lower(Team.name) == func.lower(name) and Jam.ongoing == True)
+            select(Team).join(Team.jam).where((func.lower(Team.name) == func.lower(name)) & (Jam.ongoing == True))
         )
     else:
         teams = await session.execute(
