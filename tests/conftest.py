@@ -69,5 +69,5 @@ def app(override_db_session: Callable) -> FastAPI:
 @pytest.fixture()
 async def client(app: FastAPI) -> AsyncClient:
     """Return a client for testing the app."""
-    async with AsyncClient(app=app, base_url='http://testserver') as ac:
+    async with AsyncClient(app=app, base_url='http://testserver', follow_redirects=True) as ac:
         yield ac
