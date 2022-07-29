@@ -35,7 +35,7 @@ approval_rules:
   options:
     ignore_update_merges: true
 - name: staff or contributor
-  description: Two members of the staff or contributors team must leave an approval
+  description: One member of the staff or contributors team must leave an approval
   requires:
     count: 1
     organizations: ["python-discord"]
