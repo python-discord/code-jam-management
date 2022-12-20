@@ -52,14 +52,9 @@ async def test_create_winners_with_duplicates(
     client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Adding duplicate winners should return a 400."""
-    winner = {
-        "user_id": created_codejam.teams[0].users[0].user_id,
-        "first_place": False
-    }
+    winner = {"user_id": created_codejam.teams[0].users[0].user_id, "first_place": False}
 
-    response = await client.post(
-        app.url_path_for("create_winners", jam_id=created_codejam.id), json=[winner, winner]
-    )
+    response = await client.post(app.url_path_for("create_winners", jam_id=created_codejam.id), json=[winner, winner])
 
     assert response.status_code == 400
 
@@ -69,8 +64,6 @@ async def test_create_winners_with_existing_winner(
 ) -> None:
     """Adding a winner that already exists in the jam should return a 409."""
     response = await client.post(
-        app.url_path_for("create_winners", jam_id=created_winner.jam_id), json=[
-            created_winner.dict(exclude={"jam_id"})
-        ]
+        app.url_path_for("create_winners", jam_id=created_winner.jam_id), json=[created_winner.dict(exclude={"jam_id"})]
     )
     assert response.status_code == 409

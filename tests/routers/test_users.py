@@ -24,9 +24,7 @@ async def test_get_nonexistent_user(client: AsyncClient, app: FastAPI) -> None:
 
 
 async def test_list_users_with_existing_jam(
-    client: AsyncClient,
-    created_codejam: models.CodeJamResponse,
-    app: FastAPI
+    client: AsyncClient, created_codejam: models.CodeJamResponse, app: FastAPI
 ) -> None:
     """Listing users with an existing jam should display the users in the jam."""
     response = await client.get(app.url_path_for("get_users"))
@@ -58,9 +56,7 @@ async def test_create_user_without_db_entries(client: AsyncClient, app: FastAPI)
 
 
 async def test_create_user_existing_user(
-    client: AsyncClient,
-    created_codejam: models.CodeJamResponse,
-    app: FastAPI
+    client: AsyncClient, created_codejam: models.CodeJamResponse, app: FastAPI
 ) -> None:
     """Creating a user with an existing user should return a 400."""
     user = created_codejam.teams[0].users[0]
@@ -69,10 +65,7 @@ async def test_create_user_existing_user(
     assert response.status_code == 400
 
 
-async def test_get_current_team_no_ongoing_jam(
-    client: AsyncClient,
-    app: FastAPI
-) -> None:
+async def test_get_current_team_no_ongoing_jam(client: AsyncClient, app: FastAPI) -> None:
     """Getting current team without ongoing jam should return code 404."""
     await client.post(app.url_path_for("create_user", user_id=1234))
 
@@ -80,19 +73,14 @@ async def test_get_current_team_no_ongoing_jam(
     assert response.status_code == 404
 
 
-async def test_get_current_team_user_not_found(
-    client: AsyncClient,
-    app: FastAPI
-) -> None:
+async def test_get_current_team_user_not_found(client: AsyncClient, app: FastAPI) -> None:
     """Getting current team with unknown user ID should return code 404."""
     response = await client.get(app.url_path_for("get_current_team", user_id=1234))
     assert response.status_code == 404
 
 
 async def test_get_current_team_user_not_participating(
-    client: AsyncClient,
-    created_codejam: models.CodeJamResponse,
-    app: FastAPI
+    client: AsyncClient, created_codejam: models.CodeJamResponse, app: FastAPI
 ) -> None:
     """Getting current team when user not participating in ongoing jam should return code 404."""
     team = created_codejam.teams[0]
@@ -102,18 +90,14 @@ async def test_get_current_team_user_not_participating(
     response = await client.get(app.url_path_for("get_current_team", user_id=user.user_id))
     assert response.status_code == 200
 
-    await client.delete(
-        app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id)
-    )
+    await client.delete(app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id))
 
     response = await client.get(app.url_path_for("get_current_team", user_id=user.user_id))
     assert response.status_code == 404
 
 
 async def test_get_current_team_with_participating_user(
-    client: AsyncClient,
-    created_codejam: models.CodeJamResponse,
-    app: FastAPI
+    client: AsyncClient, created_codejam: models.CodeJamResponse, app: FastAPI
 ) -> None:
     """Getting current team of participating user should return code 200."""
     team = created_codejam.teams[0]

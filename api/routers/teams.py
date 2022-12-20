@@ -47,15 +47,7 @@ async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(g
     return teams.scalars().all()
 
 
-@router.get(
-    "/find",
-    response_model=TeamResponse,
-    responses={
-        404: {
-            "description": "Team could not be found."
-        }
-    }
-)
+@router.get("/find", response_model=TeamResponse, responses={404: {"description": "Team could not be found."}})
 async def find_team_by_name(
     name: str, jam_id: Optional[int] = None, session: AsyncSession = Depends(get_db_session)
 ) -> Team:
@@ -77,29 +69,13 @@ async def find_team_by_name(
     return team
 
 
-@router.get(
-    "/{team_id}",
-    response_model=TeamResponse,
-    responses={
-        404: {
-            "description": "Team could not be found."
-        }
-    }
-)
+@router.get("/{team_id}", response_model=TeamResponse, responses={404: {"description": "Team could not be found."}})
 async def get_team(team_id: int, session: AsyncSession = Depends(get_db_session)) -> Team:
     """Get a specific code jam team in the database by ID."""
     return await ensure_team_exists(team_id, session)
 
 
-@router.get(
-    "/{team_id}/users",
-    response_model=list[User],
-    responses={
-        404: {
-            "description": "Team could not be found."
-        }
-    }
-)
+@router.get("/{team_id}/users", response_model=list[User], responses={404: {"description": "Team could not be found."}})
 async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_session)) -> list[TeamUser]:
     """Get the users of a specific code jam team in the database."""
     await ensure_team_exists(team_id, session)
@@ -117,10 +93,8 @@ async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_se
         404: {
             "description": "Team or user could not be found.",
         },
-        400: {
-            "description": "This user is already on the team."
-        }
-    }
+        400: {"description": "This user is already on the team."},
+    },
 )
 async def add_user_to_team(
     team_id: int, user_id: int, is_leader: bool = False, session: AsyncSession = Depends(get_db_session)
@@ -151,10 +125,8 @@ async def add_user_to_team(
         404: {
             "description": "Team or user could not be found.",
         },
-        400: {
-            "description": "This user is not on this team."
-        }
-    }
+        400: {"description": "This user is not on this team."},
+    },
 )
 async def remove_user_from_team(
     team_id: int, user_id: int, session: AsyncSession = Depends(get_db_session)

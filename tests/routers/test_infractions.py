@@ -23,9 +23,7 @@ async def test_get_nonexsistent_infraction(client: AsyncClient, app: FastAPI) ->
 
 
 async def test_get_existent_infraction(
-    client: AsyncClient,
-    app: FastAPI,
-    created_infraction: models.InfractionResponse
+    client: AsyncClient, app: FastAPI, created_infraction: models.InfractionResponse
 ) -> None:
     """Getting an existing infraction should return 200."""
     response = await client.get(app.url_path_for("get_infraction", infraction_id=created_infraction.id))
