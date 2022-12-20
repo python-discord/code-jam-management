@@ -6,38 +6,56 @@ authors = ["Python Discord <info@pythondiscord.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-uvicorn = "^0.13.4"
-fastapi = "^0.65.2"
-asyncpg = "^0.23.0"
-python-decouple = "^3.4"
-SQLAlchemy = "^1.4.19"
-alembic = "^1.6.5"
+python = "3.11.*"
 
-[tool.poetry.dev-dependencies]
-pre-commit = "^2.12.1"
-flake8 = "^3.9.2"
-pytest = "^6.2.4"
-pytest-asyncio = "^0.15.1"
-hypothesis = "^6.14.0"
-httpx = "^0.23.0"
-pytest-cov = "^2.12.1"
-coveralls = "^3.1.0"
-taskipy = "^1.8.1"
-flake8-annotations = "^2.6.2"
-flake8-bugbear = "^21.4.3"
-flake8-docstrings = "^1.6.0"
-flake8-import-order = "^0.18.1"
-flake8-string-format = "^0.3.0"
-flake8-tidy-imports = "^4.3.0"
-flake8-todo = "^0.7"
-pep8-naming = "^0.11.1"
+alembic = {version = "1.9.0", extras = ["tz"]}
+fastapi = "0.88.0"
+python-decouple = "3.6"
+SQLAlchemy = {version = "1.4.45", extras = ["asyncio", "postgresql_asyncpg"]}
+uvicorn = {version = "0.20.0", extras = ["standard"]}
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "1.10.3"
+poetry-plugin-export = "1.2.0"
+
+[tool.poetry.group.linting.dependencies]
+black = "22.12.0"
+isort = "5.11.3"
+flake8 = "6.0.0"
+flake8-annotations = "2.9.1"
+flake8-bugbear = "22.12.6"
+flake8-docstrings = "1.6"
+flake8-isort = "5.0.3"
+flake8-string-format = "0.3.0"
+flake8-tidy-imports = "4.8.0"
+flake8-todo = "0.7"
+pep8-naming = "0.13.2"
+pre-commit = "2.20.0"
+
+[tool.poetry.group.testing.dependencies]
+coveralls = "3.3.1"
+httpx = "0.23.1"
+hypothesis = "6.61.0"
+pytest = "7.2.0"
+pytest-asyncio = "0.18.3"
+pytest-cov = "4.0.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.2.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.taskipy.tasks]
 lint = "pre-commit run --all-files"
 precommit = "pre-commit install"
+revision = "alembic revision --autogenerate -m"
+migrate = "alembic upgrade head"
+black = "black migrations tests api"
+isort = "isort ."
 webserver = "uvicorn api.main:app"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.black]
+line-length = 120
