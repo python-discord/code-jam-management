@@ -8,7 +8,6 @@ from api.database import Jam, TeamUser, User
 from api.dependencies import get_db_session
 from api.models import UserResponse, UserTeamResponse
 
-
 router = APIRouter(prefix="/users", tags=["users"])
 
 

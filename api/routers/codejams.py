@@ -9,7 +9,6 @@ from api.database import Jam, Team, TeamUser, User
 from api.dependencies import get_db_session
 from api.models import CodeJam, CodeJamResponse
 
-
 router = APIRouter(prefix="/codejams", tags=["codejams"])
 
 

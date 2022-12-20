@@ -3,7 +3,8 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, User, Winner as DbWinner
+from api.database import Jam, User
+from api.database import Winner as DbWinner
 from api.dependencies import get_db_session
 from api.models import Winner, WinnerResponse
 

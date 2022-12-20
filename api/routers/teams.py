@@ -5,7 +5,8 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, Team, TeamUser, User as DbUser
+from api.database import Jam, Team, TeamUser
+from api.database import User as DbUser
 from api.dependencies import get_db_session
 from api.models import TeamResponse, User
 

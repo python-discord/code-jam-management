@@ -10,13 +10,7 @@ from starlette.authentication import AuthCredentials, AuthenticationError, Simpl
 from starlette.responses import JSONResponse
 
 from api.constants import Config
-from api.middleware import (
-    INVALID_CREDENTIALS,
-    NO_AUTHORIZATION_HEADER,
-    on_auth_error,
-)
-from api.middleware import TokenAuthentication
-
+from api.middleware import INVALID_CREDENTIALS, NO_AUTHORIZATION_HEADER, TokenAuthentication, on_auth_error
 
 pytestmark = pytest.mark.asyncio
 

@@ -1,10 +1,5 @@
 """Middleware for Bearer token authentication."""
-from starlette.authentication import (
-    AuthCredentials,
-    AuthenticationBackend,
-    AuthenticationError,
-    SimpleUser,
-)
+from starlette.authentication import AuthCredentials, AuthenticationBackend, AuthenticationError, SimpleUser
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
