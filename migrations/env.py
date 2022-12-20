@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio.engine import AsyncConnection
 # This is a required step by Alembic to properly generate migrations
 from api import database
 from api.constants import Config
+
 target_metadata = database.Base.metadata
 
 # this is the Alembic Config object, which provides
