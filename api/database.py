@@ -15,9 +15,7 @@ class TeamUser(Base):
     """A user who belongs to a team."""
 
     __tablename__ = "team_has_user"
-    __table_args__ = (
-        PrimaryKeyConstraint('team_id', 'user_id'),
-    )
+    __table_args__ = (PrimaryKeyConstraint("team_id", "user_id"),)
 
     team_id = Column(ForeignKey("teams.id"), nullable=False)
     user_id = Column(ForeignKey("users.id"), nullable=False)
@@ -65,18 +63,14 @@ class Team(Base):
     jam = relationship("Jam", back_populates="teams", lazy="joined")
     users = relationship("TeamUser", back_populates="team", lazy="joined")
 
-    __table_args__ = (
-        Index('team_name_jam_unique', text("lower(name)"), "jam_id", unique=True),
-    )
+    __table_args__ = (Index("team_name_jam_unique", text("lower(name)"), "jam_id", unique=True),)
 
 
 class Winner(Base):
     """A user who has won a code jam."""
 
     __tablename__ = "winners"
-    __table_args__ = (
-        PrimaryKeyConstraint('jam_id', 'user_id'),
-    )
+    __table_args__ = (PrimaryKeyConstraint("jam_id", "user_id"),)
 
     jam_id = Column(ForeignKey("jams.id"), nullable=False)
     user_id = Column(ForeignKey("users.id"), nullable=False)

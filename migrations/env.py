@@ -50,10 +50,7 @@ def run_migrations_offline() -> None:
 def do_run_migrations(connection: AsyncConnection):
     """Run all migrations on the given connection."""
     context.configure(
-        connection=connection,
-        target_metadata=target_metadata,
-        compare_type=True,
-        compare_server_default=True
+        connection=connection, target_metadata=target_metadata, compare_type=True, compare_server_default=True
     )
 
     with context.begin_transaction():

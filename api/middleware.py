@@ -15,9 +15,7 @@ class TokenAuthentication(AuthenticationBackend):
     def __init__(self, token: str) -> None:
         self.expected_auth_header = f"Token {token}"
 
-    async def authenticate(
-            self, request: Request
-    ) -> tuple[AuthCredentials, SimpleUser]:
+    async def authenticate(self, request: Request) -> tuple[AuthCredentials, SimpleUser]:
         """Authenticate the request based on the Authorization header."""
         if Config.DEBUG:
             credentials = AuthCredentials(scopes=["debug"])

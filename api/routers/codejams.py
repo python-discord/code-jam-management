@@ -24,11 +24,7 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
 @router.get(
     "/{codejam_id}",
     response_model=CodeJamResponse,
-    responses={
-        404: {
-            "description": "CodeJam could not be found or there is no ongoing code jam."
-        }
-    }
+    responses={404: {"description": "CodeJam could not be found or there is no ongoing code jam."}},
 )
 async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> Jam:
     """
@@ -37,9 +33,7 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
     Passing -1 as the codejam ID will return the ongoing codejam.
     """
     if codejam_id == -1:
-        ongoing_jams = (
-            await session.execute(select(Jam).where(Jam.ongoing == True))
-        ).unique().scalars().all()
+        ongoing_jams = (await session.execute(select(Jam).where(Jam.ongoing == True))).unique().scalars().all()
 
         if not ongoing_jams:
             raise HTTPException(status_code=404, detail="There is no ongoing codejam.")
@@ -56,19 +50,12 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
     return jam
 
 
-@router.patch(
-    "/{codejam_id}",
-    responses={
-        404: {
-            "description": "Code Jam with specified ID does not exist."
-        }
-    }
-)
+@router.patch("/{codejam_id}", responses={404: {"description": "Code Jam with specified ID does not exist."}})
 async def modify_codejam(
     codejam_id: int,
     name: Optional[str] = None,
     ongoing: Optional[bool] = None,
-    session: AsyncSession = Depends(get_db_session)
+    session: AsyncSession = Depends(get_db_session),
 ) -> None:
     """Modify the specified codejam to change its name and/or whether it's the ongoing code jam."""
     codejam = await session.execute(select(Jam).where(Jam.id == codejam_id))
@@ -113,16 +100,19 @@ async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_d
             jam_id=jam.id,
             name=raw_team.name,
             discord_role_id=raw_team.discord_role_id,
-            discord_channel_id=raw_team.discord_channel_id
+            discord_channel_id=raw_team.discord_channel_id,
         )
         session.add(team)
         # Flush here to receive team ID
         await session.flush()
 
         for raw_user in raw_team.users:
-            if not (
-                    await session.execute(select(User).where(User.id == raw_user.user_id))
-            ).unique().scalars().one_or_none():
+            if (
+                not (await session.execute(select(User).where(User.id == raw_user.user_id)))
+                .unique()
+                .scalars()
+                .one_or_none()
+            ):
                 user = User(id=raw_user.user_id)
                 session.add(user)
 
