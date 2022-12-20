@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Infraction as DbInfraction, Jam, User
+from api.database import Infraction as DbInfraction
+from api.database import Jam, User
 from api.dependencies import get_db_session
 from api.models import Infraction, InfractionResponse
 
