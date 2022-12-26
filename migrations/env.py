@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio.engine import AsyncConnection
 # This is a required step by Alembic to properly generate migrations
 from api import database
 from api.constants import Config
+
 target_metadata = database.Base.metadata
 
 # this is the Alembic Config object, which provides
@@ -49,10 +50,7 @@ def run_migrations_offline() -> None:
 def do_run_migrations(connection: AsyncConnection):
     """Run all migrations on the given connection."""
     context.configure(
-        connection=connection,
-        target_metadata=target_metadata,
-        compare_type=True,
-        compare_server_default=True
+        connection=connection, target_metadata=target_metadata, compare_type=True, compare_server_default=True
     )
 
     with context.begin_transaction():

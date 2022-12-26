@@ -30,24 +30,18 @@ async def test_list_team_users_without_db_entries(client: AsyncClient, app: Fast
 
 async def test_add_user_to_nonexistent_team(client: AsyncClient, app: FastAPI) -> None:
     """Adding a user to a nonexistent team should return a 404."""
-    response = await client.post(
-        app.url_path_for("add_user_to_team", team_id=123826, user_id=123124)
-    )
+    response = await client.post(app.url_path_for("add_user_to_team", team_id=123826, user_id=123124))
     assert response.status_code == 404
 
 
 async def test_remove_user_from_nonexistent_team(client: AsyncClient, app: FastAPI) -> None:
     """Deleting a user from a nonexistent team should return a 404."""
-    response = await client.delete(
-        app.url_path_for("remove_user_from_team", team_id=123826, user_id=123124)
-    )
+    response = await client.delete(app.url_path_for("remove_user_from_team", team_id=123826, user_id=123124))
     assert response.status_code == 404
 
 
 async def test_get_team_with_existing_jam(
-    client: AsyncClient,
-    app: FastAPI,
-    created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Getting an existing infraction should return 200."""
     team = created_codejam.teams[0]
@@ -59,9 +53,7 @@ async def test_get_team_with_existing_jam(
 
 
 async def test_list_team_with_existing_jam(
-    client: AsyncClient,
-    app: FastAPI,
-    created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Getting an existing team should return 200."""
     response = await client.get(app.url_path_for("get_teams"))
@@ -82,7 +74,7 @@ async def test_add_user_to_team(
 
     response = await client.post(
         app.url_path_for("add_user_to_team", team_id=team_2.id, user_id=user.user_id),
-        params={"is_leader": user.is_leader}
+        params={"is_leader": user.is_leader},
     )
 
     assert response.status_code == 200
@@ -101,9 +93,7 @@ async def test_remove_user_from_team(
     team = created_codejam.teams[0]
     user = team.users[0]
 
-    response = await client.delete(
-        app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id)
-    )
+    response = await client.delete(app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id))
 
     assert response.status_code == 204
 
@@ -127,7 +117,7 @@ async def test_add_existing_team_user(
 
     response = await client.post(
         app.url_path_for("add_user_to_team", team_id=team.id, user_id=user.user_id),
-        params={"is_leader": user.is_leader}
+        params={"is_leader": user.is_leader},
     )
 
     assert response.status_code == 400
@@ -142,38 +132,25 @@ async def test_remove_nonexisting_team_user(
     team = created_codejam.teams[0]
     user = created_codejam.teams[1].users[0]
 
-    response = await client.delete(
-        app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id)
-    )
+    response = await client.delete(app.url_path_for("remove_user_from_team", team_id=team.id, user_id=user.user_id))
 
     assert response.status_code == 400
 
 
-async def test_find_nonexisting_team(
-    client: AsyncClient,
-    app: FastAPI
-) -> None:
+async def test_find_nonexisting_team(client: AsyncClient, app: FastAPI) -> None:
     """Getting a non-existing team by name should return 404."""
-    response = await client.get(
-        app.url_path_for("find_team_by_name"),
-        params={"name": "team that should never exist"}
-    )
+    response = await client.get(app.url_path_for("find_team_by_name"), params={"name": "team that should never exist"})
 
     assert response.status_code == 404
 
 
 async def test_find_existing_team_case_insensitive_current_jam(
-    client: AsyncClient,
-    app: FastAPI,
-    created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Getting an existing team (current jam) should return 200 and be case-insensitive."""
     team = created_codejam.teams[0]
 
-    response = await client.get(
-        app.url_path_for("find_team_by_name"),
-        params={"name": team.name.upper()}
-    )
+    response = await client.get(app.url_path_for("find_team_by_name"), params={"name": team.name.upper()})
     assert response.status_code == 200
 
     parsed = models.TeamResponse(**response.json())
@@ -181,29 +158,23 @@ async def test_find_existing_team_case_insensitive_current_jam(
 
 
 async def test_find_team_by_name_wrong_jam(
-    client: AsyncClient,
-    app: FastAPI,
-    created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Getting an existing team from wrong code jam should return 404."""
     response = await client.get(
-        app.url_path_for("find_team_by_name"),
-        params={"name": created_codejam.teams[0].name.upper(), "jam_id": 9999}
+        app.url_path_for("find_team_by_name"), params={"name": created_codejam.teams[0].name.upper(), "jam_id": 9999}
     )
     assert response.status_code == 404
 
 
 async def test_find_team_by_name_using_specific_jam(
-    client: AsyncClient,
-    app: FastAPI,
-    created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, created_codejam: models.CodeJamResponse
 ) -> None:
     """Getting an existing team using right jam ID should return 200 and be case-insensitive."""
     team = created_codejam.teams[0]
 
     response = await client.get(
-        app.url_path_for("find_team_by_name"),
-        params={"name": team.name.upper(), "jam_id": created_codejam.id}
+        app.url_path_for("find_team_by_name"), params={"name": team.name.upper(), "jam_id": created_codejam.id}
     )
     assert response.status_code == 200
 

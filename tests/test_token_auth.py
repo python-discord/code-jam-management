@@ -10,13 +10,7 @@ from starlette.authentication import AuthCredentials, AuthenticationError, Simpl
 from starlette.responses import JSONResponse
 
 from api.constants import Config
-from api.middleware import (
-    INVALID_CREDENTIALS,
-    NO_AUTHORIZATION_HEADER,
-    on_auth_error,
-)
-from api.middleware import TokenAuthentication
-
+from api.middleware import INVALID_CREDENTIALS, NO_AUTHORIZATION_HEADER, TokenAuthentication, on_auth_error
 
 pytestmark = pytest.mark.asyncio
 
@@ -49,7 +43,7 @@ def mock_settings(monkeypatch: MonkeyPatch) -> None:
 
 
 async def test_authenticates_with_valid_token(
-        auth_middleware: TokenAuthentication,
+    auth_middleware: TokenAuthentication,
 ) -> None:
     """Test authentication with a valid token."""
     request = create_request("/", API_TOKEN)
@@ -62,7 +56,7 @@ async def test_authenticates_with_valid_token(
 
 
 async def test_authentication_fails_without_auth_header(
-        auth_middleware: TokenAuthentication,
+    auth_middleware: TokenAuthentication,
 ) -> None:
     """Test authentication without providing a Authentication header."""
     request = create_request("/", None)
@@ -74,8 +68,8 @@ async def test_authentication_fails_without_auth_header(
 
 @given(text())
 async def test_authentication_fails_with_incorrect_token(
-        auth_middleware: TokenAuthentication,
-        invalid_token: str,
+    auth_middleware: TokenAuthentication,
+    invalid_token: str,
 ) -> None:
     """Test authentication with an invalid token."""
     assume(invalid_token != API_TOKEN)
@@ -88,8 +82,8 @@ async def test_authentication_fails_with_incorrect_token(
 
 
 async def test_debug_unauthenticated_access(
-        auth_middleware: TokenAuthentication,
-        monkeypatch: MonkeyPatch,
+    auth_middleware: TokenAuthentication,
+    monkeypatch: MonkeyPatch,
 ) -> None:
     """Test unauthenticated access to some endpoints in DEBUG mode."""
     monkeypatch.setattr(Config, "DEBUG", True)

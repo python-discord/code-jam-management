@@ -29,35 +29,33 @@ async def delete_jam(jam: models.CodeJamResponse, session: AsyncSession) -> None
 def codejam() -> models.CodeJam:
     """Build a codejam for test purposes."""
     return models.CodeJam(
-        name='Python Discord Test Jam 1 - Break your coverage!',
+        name="Python Discord Test Jam 1 - Break your coverage!",
         ongoing=True,
         teams=[
             models.Team(
-                name='lemoncluster 1',
+                name="lemoncluster 1",
                 users=[
                     models.User(user_id=1337, is_leader=True),
                     models.User(user_id=109248, is_leader=False),
                 ],
                 discord_role_id=1,
-                discord_channel_id=1
+                discord_channel_id=1,
             ),
             models.Team(
-                name='lemoncluster 2',
+                name="lemoncluster 2",
                 users=[
                     models.User(user_id=298, is_leader=False),
                     models.User(user_id=2180, is_leader=True),
                 ],
                 discord_role_id=2,
-                discord_channel_id=2
+                discord_channel_id=2,
             ),
-        ]
+        ],
     )
 
 
 @pytest.fixture
-async def created_codejam(
-        client: AsyncClient, codejam: models.CodeJam, session: AsyncSession
-) -> models.CodeJam:
+async def created_codejam(client: AsyncClient, codejam: models.CodeJam, session: AsyncSession) -> models.CodeJam:
     """Create the codejam via the API and yield it."""
     # Ensure no users are in the database.
     current_users = len((await session.execute(select(User))).unique().scalars().all())
@@ -66,7 +64,7 @@ async def created_codejam(
     # Create the codejam and parse it into the expected
     # response model. This also double-checks proper response
     # structure.
-    response = await client.post('/codejams', json=codejam.dict())
+    response = await client.post("/codejams", json=codejam.dict())
     assert response.status_code == 200, "Failed to create test codejam"
     created_jam = response.json()
     parsed = models.CodeJamResponse(**created_jam)
@@ -75,10 +73,7 @@ async def created_codejam(
 
 @pytest.fixture
 async def created_infraction(
-        client: AsyncClient,
-        app: FastAPI,
-        session: AsyncSession,
-        created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, session: AsyncSession, created_codejam: models.CodeJamResponse
 ) -> models.InfractionResponse:
     """Create a test Infraction via the API and yield it."""
     # Select one of the test users, so that we can issue an infraction to that user
@@ -86,31 +81,30 @@ async def created_infraction(
     jam_id = created_codejam.id
     response = await client.post(
         app.url_path_for("create_infraction"),
-        json={"user_id": user_id, "jam_id": jam_id, "reason": "Too good to be true", "infraction_type": "warning"}
+        json={"user_id": user_id, "jam_id": jam_id, "reason": "Too good to be true", "infraction_type": "warning"},
     )
     parsed_infraction = models.InfractionResponse(**response.json())
     assert response.status_code == 200
     # Check whether the infraction was actually created, and insterted into the db
     assert (
-        await (session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id)))
-    ).unique().scalars().one_or_none(), "Failed to create Infraction"
+        (await (session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id))))
+        .unique()
+        .scalars()
+        .one_or_none()
+    ), "Failed to create Infraction"
     yield parsed_infraction
 
 
 @pytest.fixture
 async def created_winner(
-        client: AsyncClient,
-        app: FastAPI,
-        session: AsyncSession,
-        created_codejam: models.CodeJamResponse
+    client: AsyncClient, app: FastAPI, session: AsyncSession, created_codejam: models.CodeJamResponse
 ) -> models.WinnerResponse:
     """Create a single test Winner via the API and yield it."""
     # Select a test user, so that we can use it to create the winner
     user_id = created_codejam.teams[0].users[0].user_id
     jam_id = created_codejam.id
     response = await client.post(
-        app.url_path_for("create_winners", jam_id=jam_id),
-        json=[{"user_id": user_id, "first_place": True}]
+        app.url_path_for("create_winners", jam_id=jam_id), json=[{"user_id": user_id, "first_place": True}]
     )
 
     assert response.status_code == 200
@@ -118,7 +112,10 @@ async def created_winner(
     parsed_winner = models.WinnerResponse(**raw_winner)
 
     assert (
-        await session.execute(select(Winner).where(Winner.user_id == parsed_winner.user_id))
-    ).unique().scalars().one_or_none(), "Failed to create Winner"
+        (await session.execute(select(Winner).where(Winner.user_id == parsed_winner.user_id)))
+        .unique()
+        .scalars()
+        .one_or_none()
+    ), "Failed to create Winner"
 
     yield parsed_winner

@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Infraction as DbInfraction, Jam, User
+from api.database import Infraction as DbInfraction
+from api.database import Jam, User
 from api.dependencies import get_db_session
 from api.models import Infraction, InfractionResponse
 
@@ -21,11 +22,7 @@ async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> li
 @router.get(
     "/{infraction_id}",
     response_model=InfractionResponse,
-    responses={
-        404: {
-            "description": "Infraction could not be found."
-        }
-    }
+    responses={404: {"description": "Infraction could not be found."}},
 )
 async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
     """Get a specific infraction stored in the database by ID."""
@@ -39,13 +36,7 @@ async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get
 
 
 @router.post(
-    "/",
-    response_model=InfractionResponse,
-    responses={
-        404: {
-            "Description": "Jam ID or User ID could not be found."
-        }
-    }
+    "/", response_model=InfractionResponse, responses={404: {"Description": "Jam ID or User ID could not be found."}}
 )
 async def create_infraction(infraction: Infraction, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
     """Add an infraction for a user to the database."""
@@ -60,10 +51,7 @@ async def create_infraction(infraction: Infraction, session: AsyncSession = Depe
         raise HTTPException(404, "User with specified ID could not be found.")
 
     infraction = DbInfraction(
-        user_id=user_id,
-        jam_id=jam_id,
-        infraction_type=infraction.infraction_type,
-        reason=infraction.reason
+        user_id=user_id, jam_id=jam_id, infraction_type=infraction.infraction_type, reason=infraction.reason
     )
     session.add(infraction)
     await session.flush()

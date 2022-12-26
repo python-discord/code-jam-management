@@ -1,10 +1,5 @@
 """Middleware for Bearer token authentication."""
-from starlette.authentication import (
-    AuthCredentials,
-    AuthenticationBackend,
-    AuthenticationError,
-    SimpleUser,
-)
+from starlette.authentication import AuthCredentials, AuthenticationBackend, AuthenticationError, SimpleUser
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -20,9 +15,7 @@ class TokenAuthentication(AuthenticationBackend):
     def __init__(self, token: str) -> None:
         self.expected_auth_header = f"Token {token}"
 
-    async def authenticate(
-            self, request: Request
-    ) -> tuple[AuthCredentials, SimpleUser]:
+    async def authenticate(self, request: Request) -> tuple[AuthCredentials, SimpleUser]:
         """Authenticate the request based on the Authorization header."""
         if Config.DEBUG:
             credentials = AuthCredentials(scopes=["debug"])
