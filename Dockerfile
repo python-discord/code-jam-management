@@ -21,4 +21,4 @@ ENV uvicorn_extras=$uvicorn_extras
 
 COPY . .
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["alembic upgrade head && uvicorn api.main:app --host 0.0.0.0 --port 80 $uvicorn_extras"]
+CMD ["alembic upgrade head && uvicorn api.main:app --host 0.0.0.0 --port 8000 $uvicorn_extras"]
