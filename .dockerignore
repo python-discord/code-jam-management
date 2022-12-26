@@ -1,0 +1,10 @@
+# Exclude everything
+*
+
+# Make exceptions for what's needed
+!api
+!pyproject.toml
+!main-requirements.txt
+!LICENSE
+!alembic.ini
+!migrations

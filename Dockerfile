@@ -19,5 +19,6 @@ USER codejam_management
 ARG uvicorn_extras=""
 ENV uvicorn_extras=$uvicorn_extras
 
+COPY . .
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["alembic upgrade head && uvicorn api.main:app --host 0.0.0.0 --port 80 $uvicorn_extras"]
