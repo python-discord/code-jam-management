@@ -1,14 +1,19 @@
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy import BigInteger, Boolean, Column, Enum, ForeignKey, Index, Integer, PrimaryKeyConstraint, Text, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from api.constants import Config
+from api.dependencies import get_db_session
 
 engine = create_async_engine(Config.DATABASE_URL)
 Base = declarative_base()
 
 Session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+DBSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 
 class TeamUser(Base):

@@ -1,17 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException
 from sqlalchemy.future import select
 
+from api.database import DBSession
 from api.database import Infraction as DbInfraction
 from api.database import Jam, User
-from api.dependencies import get_db_session
 from api.models import Infraction, InfractionResponse
 
 router = APIRouter(prefix="/infractions", tags=["infractions"])
 
 
 @router.get("/")
-async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[InfractionResponse]:
+async def get_infractions(session: DBSession) -> list[InfractionResponse]:
     """Get every infraction stored in the database."""
     infractions = await session.execute(select(DbInfraction))
     infractions.unique()
@@ -23,7 +22,7 @@ async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> li
     "/{infraction_id}",
     responses={404: {"description": "Infraction could not be found."}},
 )
-async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> InfractionResponse:
+async def get_infraction(infraction_id: int, session: DBSession) -> InfractionResponse:
     """Get a specific infraction stored in the database by ID."""
     infraction_result = await session.execute(select(DbInfraction).where(DbInfraction.id == infraction_id))
     infraction_result.unique()
@@ -40,7 +39,7 @@ async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get
 )
 async def create_infraction(
     infraction: Infraction,
-    session: AsyncSession = Depends(get_db_session),
+    session: DBSession,
 ) -> InfractionResponse:
     """Add an infraction for a user to the database."""
     jam_id = (await session.execute(select(Jam.id).where(Jam.id == infraction.jam_id))).scalars().one_or_none()

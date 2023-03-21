@@ -1,11 +1,10 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, TeamUser, User
-from api.dependencies import get_db_session
+from api.database import DBSession, Jam, TeamUser, User
 from api.models import UserResponse, UserTeamResponse
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -48,7 +47,7 @@ async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
 
 
 @router.get("/")
-async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[UserResponse]:
+async def get_users(session: DBSession) -> list[UserResponse]:
     """Get information about all the users stored in the database."""
     users = await session.execute(select(User.id))
     users.unique()
@@ -57,7 +56,7 @@ async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[Use
 
 
 @router.get("/{user_id}", responses={404: {"description": "User could not be found."}})
-async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserResponse:
+async def get_user(user_id: int, session: DBSession) -> UserResponse:
     """Get a specific user stored in the database by ID."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()
@@ -69,7 +68,7 @@ async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)
 
 
 @router.post("/{user_id}", responses={400: {"description": "User already exists."}})
-async def create_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserResponse:
+async def create_user(user_id: int, session: DBSession) -> UserResponse:
     """Create a new user with the specified ID to the database."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()
@@ -94,7 +93,7 @@ async def create_user(user_id: int, session: AsyncSession = Depends(get_db_sessi
         }
     },
 )
-async def get_current_team(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserTeamResponse:
+async def get_current_team(user_id: int, session: DBSession) -> UserTeamResponse:
     """Get a user's current team information."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()

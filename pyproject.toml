@@ -9,7 +9,7 @@ license = "MIT"
 python = "3.11.*"
 
 alembic = {version = "1.10.2", extras = ["tz"]}
-fastapi = "0.89.0"
+fastapi = "0.95.0"
 python-decouple = "3.8"
 SQLAlchemy = {version = "1.4.45", extras = ["asyncio", "postgresql_asyncpg"]}
 uvicorn = {version = "0.21.1", extras = ["standard"]}
