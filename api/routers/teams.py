@@ -35,8 +35,8 @@ async def ensure_user_exists(user_id: int, session: AsyncSession) -> DbUser:
     return user
 
 
-@router.get("/", response_model=list[TeamResponse])
-async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(get_db_session)) -> list[Team]:
+@router.get("/")
+async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(get_db_session)) -> list[TeamResponse]:
     """Get every code jam team in the database."""
     if not current_jam:
         teams = await session.execute(select(Team))
@@ -47,10 +47,10 @@ async def get_teams(current_jam: bool = False, session: AsyncSession = Depends(g
     return teams.scalars().all()
 
 
-@router.get("/find", response_model=TeamResponse, responses={404: {"description": "Team could not be found."}})
+@router.get("/find", responses={404: {"description": "Team could not be found."}})
 async def find_team_by_name(
     name: str, jam_id: Optional[int] = None, session: AsyncSession = Depends(get_db_session)
-) -> Team:
+) -> TeamResponse:
     """Get a specific code jam team by name."""
     if jam_id is None:
         teams = await session.execute(
@@ -69,14 +69,14 @@ async def find_team_by_name(
     return team
 
 
-@router.get("/{team_id}", response_model=TeamResponse, responses={404: {"description": "Team could not be found."}})
-async def get_team(team_id: int, session: AsyncSession = Depends(get_db_session)) -> Team:
+@router.get("/{team_id}", responses={404: {"description": "Team could not be found."}})
+async def get_team(team_id: int, session: AsyncSession = Depends(get_db_session)) -> TeamResponse:
     """Get a specific code jam team in the database by ID."""
     return await ensure_team_exists(team_id, session)
 
 
-@router.get("/{team_id}/users", response_model=list[User], responses={404: {"description": "Team could not be found."}})
-async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_session)) -> list[TeamUser]:
+@router.get("/{team_id}/users", responses={404: {"description": "Team could not be found."}})
+async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_session)) -> list[User]:
     """Get the users of a specific code jam team in the database."""
     await ensure_team_exists(team_id, session)
 
@@ -88,7 +88,6 @@ async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_se
 
 @router.post(
     "/{team_id}/users/{user_id}",
-    response_model=User,
     responses={
         404: {
             "description": "Team or user could not be found.",
@@ -98,7 +97,7 @@ async def get_team_users(team_id: int, session: AsyncSession = Depends(get_db_se
 )
 async def add_user_to_team(
     team_id: int, user_id: int, is_leader: bool = False, session: AsyncSession = Depends(get_db_session)
-) -> TeamUser:
+) -> User:
     """Add a user to a specific code jam team in the database."""
     await ensure_team_exists(team_id, session)
     await ensure_user_exists(user_id, session)

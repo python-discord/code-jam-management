@@ -13,10 +13,9 @@ router = APIRouter(prefix="/winners", tags=["winners"])
 
 @router.get(
     "/{jam_id}",
-    response_model=list[WinnerResponse],
     responses={404: {"description": "The specified codejam could not be found."}},
 )
-async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_session)) -> list[DbWinner]:
+async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_session)) -> list[WinnerResponse]:
     """Get the top ten winners from the specified codejam."""
     jam = await session.execute(select(Jam).where(Jam.id == jam_id))
     jam.unique()
@@ -31,7 +30,6 @@ async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_sessio
 
 @router.post(
     "/{jam_id}",
-    response_model=list[WinnerResponse],
     responses={
         400: {"description": "The provided winners list is empty or contains duplicate users."},
         404: {

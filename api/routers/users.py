@@ -47,8 +47,8 @@ async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
     return user
 
 
-@router.get("/", response_model=list[UserResponse])
-async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[dict[str, Any]]:
+@router.get("/")
+async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[UserResponse]:
     """Get information about all the users stored in the database."""
     users = await session.execute(select(User.id))
     users.unique()
@@ -56,8 +56,8 @@ async def get_users(session: AsyncSession = Depends(get_db_session)) -> list[dic
     return [await get_user_data(session, user) for user in users.scalars().all()]
 
 
-@router.get("/{user_id}", response_model=UserResponse, responses={404: {"description": "User could not be found."}})
-async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+@router.get("/{user_id}", responses={404: {"description": "User could not be found."}})
+async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserResponse:
     """Get a specific user stored in the database by ID."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()
@@ -68,8 +68,8 @@ async def get_user(user_id: int, session: AsyncSession = Depends(get_db_session)
     return await get_user_data(session, user_id)
 
 
-@router.post("/{user_id}", response_model=UserResponse, responses={400: {"description": "User already exists."}})
-async def create_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+@router.post("/{user_id}", responses={400: {"description": "User already exists."}})
+async def create_user(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserResponse:
     """Create a new user with the specified ID to the database."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()
@@ -86,7 +86,6 @@ async def create_user(user_id: int, session: AsyncSession = Depends(get_db_sessi
 
 @router.get(
     "/{user_id}/current_team",
-    response_model=UserTeamResponse,
     responses={
         404: {
             "description": (
@@ -95,7 +94,7 @@ async def create_user(user_id: int, session: AsyncSession = Depends(get_db_sessi
         }
     },
 )
-async def get_current_team(user_id: int, session: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def get_current_team(user_id: int, session: AsyncSession = Depends(get_db_session)) -> UserTeamResponse:
     """Get a user's current team information."""
     user = await session.execute(select(User).where(User.id == user_id))
     user.unique()

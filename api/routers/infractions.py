@@ -10,8 +10,8 @@ from api.models import Infraction, InfractionResponse
 router = APIRouter(prefix="/infractions", tags=["infractions"])
 
 
-@router.get("/", response_model=list[InfractionResponse])
-async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[DbInfraction]:
+@router.get("/")
+async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> list[InfractionResponse]:
     """Get every infraction stored in the database."""
     infractions = await session.execute(select(DbInfraction))
     infractions.unique()
@@ -21,10 +21,9 @@ async def get_infractions(session: AsyncSession = Depends(get_db_session)) -> li
 
 @router.get(
     "/{infraction_id}",
-    response_model=InfractionResponse,
     responses={404: {"description": "Infraction could not be found."}},
 )
-async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
+async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get_db_session)) -> InfractionResponse:
     """Get a specific infraction stored in the database by ID."""
     infraction_result = await session.execute(select(DbInfraction).where(DbInfraction.id == infraction_id))
     infraction_result.unique()
@@ -36,9 +35,13 @@ async def get_infraction(infraction_id: int, session: AsyncSession = Depends(get
 
 
 @router.post(
-    "/", response_model=InfractionResponse, responses={404: {"Description": "Jam ID or User ID could not be found."}}
+    "/",
+    responses={404: {"Description": "Jam ID or User ID could not be found."}},
 )
-async def create_infraction(infraction: Infraction, session: AsyncSession = Depends(get_db_session)) -> DbInfraction:
+async def create_infraction(
+    infraction: Infraction,
+    session: AsyncSession = Depends(get_db_session),
+) -> InfractionResponse:
     """Add an infraction for a user to the database."""
     jam_id = (await session.execute(select(Jam.id).where(Jam.id == infraction.jam_id))).scalars().one_or_none()
 

@@ -12,8 +12,8 @@ from api.models import CodeJam, CodeJamResponse
 router = APIRouter(prefix="/codejams", tags=["codejams"])
 
 
-@router.get("/", response_model=list[CodeJamResponse])
-async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[Jam]:
+@router.get("/")
+async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[CodeJamResponse]:
     """Get all the codejams stored in the database."""
     codejams = await session.execute(select(Jam).order_by(desc(Jam.id)))
     codejams.unique()
@@ -23,10 +23,9 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
 
 @router.get(
     "/{codejam_id}",
-    response_model=CodeJamResponse,
     responses={404: {"description": "CodeJam could not be found or there is no ongoing code jam."}},
 )
-async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> Jam:
+async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> CodeJamResponse:
     """
     Get a specific codejam stored in the database by ID.
 
@@ -56,7 +55,7 @@ async def modify_codejam(
     name: Optional[str] = None,
     ongoing: Optional[bool] = None,
     session: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> CodeJamResponse:
     """Modify the specified codejam to change its name and/or whether it's the ongoing code jam."""
     codejam = await session.execute(select(Jam).where(Jam.id == codejam_id))
     codejam.unique()
@@ -80,8 +79,8 @@ async def modify_codejam(
     return jam
 
 
-@router.post("/", response_model=CodeJamResponse)
-async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> Jam:
+@router.post("/")
+async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> CodeJamResponse:
     """
     Create a new codejam and get back the one just created.
 
