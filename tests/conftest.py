@@ -10,12 +10,15 @@ from httpx import AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
-from api.constants import Config
 from api.database import Base
 from api.dependencies import get_db_session
 from api.main import app as main_app
+from api.settings import ConnectionURLs
 
-test_engine = create_async_engine(Config.DATABASE_URL, future=True, isolation_level="AUTOCOMMIT")
+test_engine = create_async_engine(
+    ConnectionURLs.DATABASE_URL.get_secret_value(),
+    isolation_level="AUTOCOMMIT",
+)
 
 
 @pytest.fixture(scope="session")
@@ -31,7 +34,7 @@ async def create_test_database_engine() -> Generator:
     """Yield back a Database engine object."""
     async with test_engine.begin() as conn:
         await conn.execute(text("CREATE DATABASE test;"))
-        test_db_url = urlsplit(Config.DATABASE_URL)._replace(path="/test")
+        test_db_url = urlsplit(ConnectionURLs.DATABASE_URL.get_secret_value())._replace(path="/test")
         engine = create_async_engine(urlunsplit(test_db_url), future=True)
         yield engine
         await engine.dispose()

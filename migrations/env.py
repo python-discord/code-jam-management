@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio.engine import AsyncConnection
 
 # This is a required step by Alembic to properly generate migrations
 from api import database
-from api.constants import Config
+from api.settings import ConnectionURLs
 
 target_metadata = database.Base.metadata
 
@@ -19,7 +19,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
-config.set_main_option("sqlalchemy.url", Config.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", ConnectionURLs.DATABASE_URL.get_secret_value())
 
 
 def run_migrations_offline() -> None:

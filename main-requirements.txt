@@ -253,9 +253,6 @@ pydantic==1.10.6 ; python_full_version >= "3.11.0" and python_full_version < "3.
 python-dateutil==2.8.2 ; python_full_version >= "3.11.0" and python_full_version < "3.12.0" \
     --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
     --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
-python-decouple==3.8 ; python_full_version >= "3.11.0" and python_full_version < "3.12.0" \
-    --hash=sha256:ba6e2657d4f376ecc46f77a3a615e058d93ba5e465c01bbe57289bfb7cce680f \
-    --hash=sha256:d0d45340815b25f4de59c974b855bb38d03151d81b037d9e3f463b0c9f8cbd66
 python-dotenv==1.0.0 ; python_full_version >= "3.11.0" and python_full_version < "3.12.0" \
     --hash=sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba \
     --hash=sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a
