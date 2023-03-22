@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.future import select
 
-from api.database import DBSession
-from api.database import Infraction as DbInfraction
-from api.database import Jam, User
 from api.models import Infraction, InfractionResponse
+from api.models.orm import Infraction as DbInfraction
+from api.models.orm import Jam, User
+from api.settings import DBSession
 
 router = APIRouter(prefix="/infractions", tags=["infractions"])
 

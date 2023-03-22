@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import func
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, User
-from api.database import Winner as DbWinner
 from api.models import Winner, WinnerResponse
+from api.models.orm import Jam, User
+from api.settings import DBSession
 
 router = APIRouter(prefix="/winners", tags=["winners"])
 

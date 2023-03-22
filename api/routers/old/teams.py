@@ -5,9 +5,10 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, Team, TeamUser
-from api.database import User as DbUser
 from api.models import TeamResponse, User
+from api.models.orm import Jam, Team
+from api.models.orm import User as DbUser
+from api.settings import DBSession
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 

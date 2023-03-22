@@ -4,8 +4,9 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, TeamUser, User
 from api.models import UserResponse, UserTeamResponse
+from api.models.orm import Jam, User
+from api.settings import DBSession
 
 router = APIRouter(prefix="/users", tags=["users"])
 

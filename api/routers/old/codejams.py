@@ -4,8 +4,9 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import desc, update
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, Team, TeamUser, User
 from api.models import CodeJam, CodeJamResponse
+from api.models.orm import Jam, Team, User
+from api.settings import DBSession
 
 router = APIRouter(prefix="/codejams", tags=["codejams"])
 
