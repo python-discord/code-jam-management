@@ -55,6 +55,7 @@ webserver = "uvicorn api.main:app"
 [tool.isort]
 profile = "black"
 line_length = 120
+known_third_party = "alembic"
 
 [tool.black]
 line-length = 120

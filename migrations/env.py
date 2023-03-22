@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio.engine import AsyncConnection
 
 # This is a required step by Alembic to properly generate migrations
-from api import database
+from api.models.orm import base
 from api.settings import ConnectionURLs
 
-target_metadata = database.Base.metadata
+target_metadata = base.Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
