@@ -1,5 +1,8 @@
+from typing import Annotated, AsyncGenerator
+
 import pydantic
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from api.utils.settings import CJMSBaseSettings
 
@@ -18,7 +21,17 @@ class Connections:
     """How to connect to other, internal services."""
 
     DB_ENGINE = create_async_engine(ConnectionURLs.DATABASE_URL.get_secret_value())
-    DB_SESSION = async_sessionmaker(DB_ENGINE)
+    DB_SESSION_MAKER = async_sessionmaker(DB_ENGINE)
+
+
+async def _get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """A dependency to pass a database session to every route function."""
+    async with Connections.DB_SESSION_MAKER() as session:
+        async with session.begin():
+            yield session
+
+
+DBSession = Annotated[AsyncSession, Depends(_get_db_session)]
 
 
 class _Server(CJMSBaseSettings):
