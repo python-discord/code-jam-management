@@ -1,19 +1,17 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import desc, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, Team, TeamUser, User
-from api.dependencies import get_db_session
+from api.database import DBSession, Jam, Team, TeamUser, User
 from api.models import CodeJam, CodeJamResponse
 
 router = APIRouter(prefix="/codejams", tags=["codejams"])
 
 
-@router.get("/", response_model=list[CodeJamResponse])
-async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[Jam]:
+@router.get("/")
+async def get_codejams(session: DBSession) -> list[CodeJamResponse]:
     """Get all the codejams stored in the database."""
     codejams = await session.execute(select(Jam).order_by(desc(Jam.id)))
     codejams.unique()
@@ -23,10 +21,9 @@ async def get_codejams(session: AsyncSession = Depends(get_db_session)) -> list[
 
 @router.get(
     "/{codejam_id}",
-    response_model=CodeJamResponse,
     responses={404: {"description": "CodeJam could not be found or there is no ongoing code jam."}},
 )
-async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_session)) -> Jam:
+async def get_codejam(codejam_id: int, session: DBSession) -> CodeJamResponse:
     """
     Get a specific codejam stored in the database by ID.
 
@@ -53,10 +50,10 @@ async def get_codejam(codejam_id: int, session: AsyncSession = Depends(get_db_se
 @router.patch("/{codejam_id}", responses={404: {"description": "Code Jam with specified ID does not exist."}})
 async def modify_codejam(
     codejam_id: int,
+    session: DBSession,
     name: Optional[str] = None,
     ongoing: Optional[bool] = None,
-    session: AsyncSession = Depends(get_db_session),
-) -> None:
+) -> CodeJamResponse:
     """Modify the specified codejam to change its name and/or whether it's the ongoing code jam."""
     codejam = await session.execute(select(Jam).where(Jam.id == codejam_id))
     codejam.unique()
@@ -80,8 +77,8 @@ async def modify_codejam(
     return jam
 
 
-@router.post("/", response_model=CodeJamResponse)
-async def create_codejam(codejam: CodeJam, session: AsyncSession = Depends(get_db_session)) -> Jam:
+@router.post("/")
+async def create_codejam(codejam: CodeJam, session: DBSession) -> CodeJamResponse:
     """
     Create a new codejam and get back the one just created.
 

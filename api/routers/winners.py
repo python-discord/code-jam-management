@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import func
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import Jam, User
+from api.database import DBSession, Jam, User
 from api.database import Winner as DbWinner
-from api.dependencies import get_db_session
 from api.models import Winner, WinnerResponse
 
 router = APIRouter(prefix="/winners", tags=["winners"])
@@ -13,10 +11,9 @@ router = APIRouter(prefix="/winners", tags=["winners"])
 
 @router.get(
     "/{jam_id}",
-    response_model=list[WinnerResponse],
     responses={404: {"description": "The specified codejam could not be found."}},
 )
-async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_session)) -> list[DbWinner]:
+async def get_winners(jam_id: int, session: DBSession) -> list[WinnerResponse]:
     """Get the top ten winners from the specified codejam."""
     jam = await session.execute(select(Jam).where(Jam.id == jam_id))
     jam.unique()
@@ -31,7 +28,6 @@ async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_sessio
 
 @router.post(
     "/{jam_id}",
-    response_model=list[WinnerResponse],
     responses={
         400: {"description": "The provided winners list is empty or contains duplicate users."},
         404: {
@@ -40,9 +36,7 @@ async def get_winners(jam_id: int, session: AsyncSession = Depends(get_db_sessio
         409: {"description": "One or more users are already a winner in the specified codejam."},
     },
 )
-async def create_winners(
-    jam_id: int, winners: list[Winner], session: AsyncSession = Depends(get_db_session)
-) -> list[WinnerResponse]:
+async def create_winners(jam_id: int, winners: list[Winner], session: DBSession) -> list[WinnerResponse]:
     """Add the top ten winners to the specified codejam."""
     jam = await session.execute(select(Jam).where(Jam.id == jam_id))
     jam.unique()

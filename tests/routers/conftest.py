@@ -87,7 +87,7 @@ async def created_infraction(
     assert response.status_code == 200
     # Check whether the infraction was actually created, and insterted into the db
     assert (
-        (await (session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id))))
+        (await session.execute(select(Infraction).where(Infraction.id == parsed_infraction.id)))
         .unique()
         .scalars()
         .one_or_none()
