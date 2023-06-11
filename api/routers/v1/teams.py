@@ -5,17 +5,18 @@ from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.models import TeamResponse, User
-from api.models.orm import Jam, Team
+from api.models.orm import Jam
+from api.models.orm import Team as DbTeam
 from api.models.orm import User as DbUser
+from api.models.schemas.v1 import team, user
 from api.settings import DBSession
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-async def ensure_team_exists(team_id: int, session: AsyncSession) -> Team:
+async def ensure_team_exists(team_id: int, session: AsyncSession) -> DbTeam:
     """Ensure that a team with the given ID exists and return it."""
-    teams = await session.execute(select(Team).where(Team.id == team_id))
+    teams = await session.execute(select(DbTeam).where(DbTeam.team_id == team_id))
     teams.unique()
 
     if not (team := teams.scalars().one_or_none()):
@@ -26,7 +27,7 @@ async def ensure_team_exists(team_id: int, session: AsyncSession) -> Team:
 
 async def ensure_user_exists(user_id: int, session: AsyncSession) -> DbUser:
     """Ensure that a user with the given ID exists and return it."""
-    users = await session.execute(select(DbUser).where(DbUser.id == user_id))
+    users = await session.execute(select(DbUser).where(DbUser.user_id == user_id))
     users.unique()
 
     if not (user := users.scalars().one_or_none()):
@@ -36,12 +37,12 @@ async def ensure_user_exists(user_id: int, session: AsyncSession) -> DbUser:
 
 
 @router.get("/")
-async def get_teams(session: DBSession, current_jam: bool = False) -> list[TeamResponse]:
+async def get_teams(session: DBSession, current_jam: bool = False) -> list[team.Team]:
     """Get every code jam team in the database."""
     if not current_jam:
-        teams = await session.execute(select(Team))
+        teams = await session.execute(select(DbTeam))
     else:
-        teams = await session.execute(select(Team).join_from(Team, Jam).where(Jam.ongoing == True))
+        teams = await session.execute(select(DbTeam).join_from(DbTeam, Jam).where(Jam.ongoing == True))
 
     teams.unique()
     return teams.scalars().all()
@@ -52,15 +53,17 @@ async def find_team_by_name(
     name: str,
     session: DBSession,
     jam_id: Optional[int] = None,
-) -> TeamResponse:
+) -> team.Team:
     """Get a specific code jam team by name."""
     if jam_id is None:
         teams = await session.execute(
-            select(Team).join(Team.jam).where((func.lower(Team.name) == func.lower(name)) & (Jam.ongoing == True))
+            select(DbTeam)
+            .join(DbTeam.__annotations__)
+            .where((func.lower(DbTeam.name) == func.lower(name)) & (Jam.ongoing == True))
         )
     else:
         teams = await session.execute(
-            select(Team).where((func.lower(Team.name) == func.lower(name)) & (Team.jam_id == jam_id))
+            select(DbTeam).where((func.lower(DbTeam.name) == func.lower(name)) & (DbTeam.jam_id == jam_id))
         )
 
     teams.unique()
@@ -72,20 +75,20 @@ async def find_team_by_name(
 
 
 @router.get("/{team_id}", responses={404: {"description": "Team could not be found."}})
-async def get_team(team_id: int, session: DBSession) -> TeamResponse:
+async def get_team(team_id: int, session: DBSession) -> team.Team:
     """Get a specific code jam team in the database by ID."""
     return await ensure_team_exists(team_id, session)
 
 
 @router.get("/{team_id}/users", responses={404: {"description": "Team could not be found."}})
-async def get_team_users(team_id: int, session: DBSession) -> list[User]:
+async def get_team_users(team_id: int, session: DBSession) -> list[user.User]:
     """Get the users of a specific code jam team in the database."""
     await ensure_team_exists(team_id, session)
 
-    team_users = await session.execute(select(TeamUser).where(TeamUser.team_id == team_id))
-    team_users.unique()
+    # team_users = await session.execute(select(TeamUser).where(TeamUser.team_id == team_id))
+    # team_users.unique()
 
-    return team_users.scalars().all()
+    # return team_users.scalars().all()
 
 
 @router.post(
@@ -97,24 +100,24 @@ async def get_team_users(team_id: int, session: DBSession) -> list[User]:
         400: {"description": "This user is already on the team."},
     },
 )
-async def add_user_to_team(team_id: int, user_id: int, session: DBSession, is_leader: bool = False) -> User:
+async def add_user_to_team(team_id: int, user_id: int, session: DBSession, is_leader: bool = False) -> user.User:
     """Add a user to a specific code jam team in the database."""
     await ensure_team_exists(team_id, session)
     await ensure_user_exists(user_id, session)
 
     team_users = await session.execute(
-        select(TeamUser).where((TeamUser.team_id == team_id) & (TeamUser.user_id == user_id))
+        # select(TeamUser).where((TeamUser.team_id == team_id) & (TeamUser.user_id == user_id))
     )
     team_users.unique()
 
     if team_users.scalars().one_or_none():
         raise HTTPException(status_code=400, detail="This user is already on this team.")
 
-    team_user = TeamUser(team_id=team_id, user_id=user_id, is_leader=is_leader)
-    session.add(team_user)
+    # team_user = TeamUser(team_id=team_id, user_id=user_id, is_leader=is_leader)
+    # session.add(team_user)
     await session.flush()
 
-    return team_user
+    # return team_user
 
 
 @router.delete(
@@ -136,7 +139,7 @@ async def remove_user_from_team(
     await ensure_team_exists(team_id, session)
 
     team_users = await session.execute(
-        select(TeamUser).where((TeamUser.team_id == team_id) & (TeamUser.user_id == user_id))
+        # select(TeamUser).where((TeamUser.team_id == team_id) & (TeamUser.user_id == user_id))
     )
     team_users.unique()
 

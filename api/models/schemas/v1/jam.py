@@ -1,22 +1,25 @@
 from pydantic import BaseModel
 
-from api.models.schemas.old import infraction, team, winner
+from api.models.schemas.v1 import infraction, team, winner
 
 
-class CodeJam(BaseModel):
-    """A model representing a codejam."""
+class CodeJamBase(BaseModel):
+    """A Base model representing a codejam."""
 
     name: str
     teams: list[team.Team]
     ongoing: bool = False
 
 
-class CodeJamResponse(CodeJam):
+class CodeJamCreate(CodeJamBase):
+    """The expected fields to create a new Code Jam."""
+
+
+class CodeJam(CodeJamBase):
     """Response model representing a code jam."""
 
     id: int
-    teams: list[team.TeamResponse]
-    infractions: list[infraction.InfractionResponse]
+    infractions: list[infraction.Infraction]
     winners: list[winner.Winner]
 
     class Config:

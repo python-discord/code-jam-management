@@ -2,11 +2,11 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from api.models.schemas.old import user
+from api.models.schemas.v1 import user
 
 
-class Team(BaseModel):
-    """A model representing a team for a codejam."""
+class TeamBase(BaseModel):
+    """A Base model representing a team for a codejam."""
 
     name: str
     users: list[user.User]
@@ -14,7 +14,7 @@ class Team(BaseModel):
     discord_channel_id: Optional[int] = None
 
 
-class TeamResponse(Team):
+class Team(TeamBase):
     """Response model representing a team."""
 
     id: int
@@ -26,11 +26,11 @@ class TeamResponse(Team):
         orm_mode = True
 
 
-class UserTeamResponse(BaseModel):
-    """Response model representing user and team relationship."""
+class UserTeam(BaseModel):
+    """A model representing user and team relationship."""
 
     user_id: int
-    team: TeamResponse
+    team: Team
     is_leader: bool
 
     class Config:

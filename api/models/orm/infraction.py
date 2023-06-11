@@ -17,7 +17,7 @@ class Infraction(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
     issued_in_jam_id: Mapped[int] = mapped_column(ForeignKey("jams.jam_id"))
     infraction_type: Mapped[InfractionType] = mapped_column(
-        Enum(*InfractionType.__args__, name="infraction_type_enum"),
+        Enum(*InfractionType.__args__, name="infraction_type"),
         nullable=False,
     )
     reason: Mapped[str] = mapped_column(String(), nullable=False)

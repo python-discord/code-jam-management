@@ -1,18 +1,6 @@
 from pydantic import BaseModel
 
-from api.models.schemas.old import infraction
-
-
-class User(BaseModel):
-    """A model representing a user for a codejam."""
-
-    user_id: int
-    is_leader: bool
-
-    class Config:
-        """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
-
-        orm_mode = True
+from api.models.schemas.v1 import infraction
 
 
 class ParticipationHistory(BaseModel):
@@ -23,7 +11,7 @@ class ParticipationHistory(BaseModel):
     first_place: bool
     team_id: int
     is_leader: bool
-    infractions: list[infraction.InfractionResponse]
+    infractions: list[infraction.Infraction]
 
     class Config:
         """Sets ORM mode to true so that pydantic will validate the objects returned by SQLAlchemy."""
@@ -31,10 +19,15 @@ class ParticipationHistory(BaseModel):
         orm_mode = True
 
 
-class UserResponse(BaseModel):
-    """Response model representing a user."""
+class UserBase(BaseModel):
+    """A Base model representing core data about a user."""
 
     id: int
+
+
+class User(UserBase):
+    """Response model representing everything about a user."""
+
     participation_history: list[ParticipationHistory]
 
     class Config:
