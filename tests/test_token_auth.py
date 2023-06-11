@@ -9,8 +9,8 @@ from hypothesis.strategies import text
 from starlette.authentication import AuthCredentials, AuthenticationError, SimpleUser
 from starlette.responses import JSONResponse
 
-from api.constants import Config
 from api.middleware import INVALID_CREDENTIALS, NO_AUTHORIZATION_HEADER, TokenAuthentication, on_auth_error
+from api.settings import Server
 
 pytestmark = pytest.mark.asyncio
 
@@ -38,7 +38,7 @@ def auth_middleware() -> TokenAuthentication:
 @pytest.fixture(autouse=True)
 def mock_settings(monkeypatch: MonkeyPatch) -> None:
     """Set `DEBUG=False` as a default for running tests."""
-    monkeypatch.setattr(Config, "DEBUG", False)
+    monkeypatch.setattr(Server, "DEBUG", False)
     yield
 
 
@@ -86,7 +86,7 @@ async def test_debug_unauthenticated_access(
     monkeypatch: MonkeyPatch,
 ) -> None:
     """Test unauthenticated access to some endpoints in DEBUG mode."""
-    monkeypatch.setattr(Config, "DEBUG", True)
+    monkeypatch.setattr(Server, "DEBUG", True)
     request = create_request("/", "invalid-token")
 
     credentials, user = await auth_middleware.authenticate(request)

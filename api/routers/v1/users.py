@@ -4,8 +4,10 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, TeamUser, User
-from api.models import UserResponse, UserTeamResponse
+from api.models.orm import jam
+from api.models.orm import user as dbuser
+from api.models.schemas.v1 import team, user
+from api.settings import DBSession
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -15,7 +17,7 @@ async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
     user: dict[str, Any] = {"id": user_id}
     participation_history = []
 
-    user_teams = await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))
+    user_teams = None  # await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))
     user_teams.unique()
 
     for user_team in user_teams.scalars().all():
@@ -47,18 +49,18 @@ async def get_user_data(session: AsyncSession, user_id: int) -> dict[str, Any]:
 
 
 @router.get("/")
-async def get_users(session: DBSession) -> list[UserResponse]:
+async def get_users(session: DBSession) -> list[user.User]:
     """Get information about all the users stored in the database."""
-    users = await session.execute(select(User.id))
+    users = await session.execute(select(dbuser.User.id))
     users.unique()
 
     return [await get_user_data(session, user) for user in users.scalars().all()]
 
 
 @router.get("/{user_id}", responses={404: {"description": "User could not be found."}})
-async def get_user(user_id: int, session: DBSession) -> UserResponse:
+async def get_user(user_id: int, session: DBSession) -> user.User:
     """Get a specific user stored in the database by ID."""
-    user = await session.execute(select(User).where(User.id == user_id))
+    user = await session.execute(select(dbuser.User).where(dbuser.User.id == user_id))
     user.unique()
 
     if not user.scalars().one_or_none():
@@ -68,15 +70,15 @@ async def get_user(user_id: int, session: DBSession) -> UserResponse:
 
 
 @router.post("/{user_id}", responses={400: {"description": "User already exists."}})
-async def create_user(user_id: int, session: DBSession) -> UserResponse:
+async def create_user(user_id: int, session: DBSession) -> user.User:
     """Create a new user with the specified ID to the database."""
-    user = await session.execute(select(User).where(User.id == user_id))
+    user = await session.execute(select(dbuser.User).where(dbuser.User.id == user_id))
     user.unique()
 
     if user.scalars().one_or_none():
         raise HTTPException(status_code=400, detail="User with specified ID already exists.")
 
-    user = User(id=user_id)
+    user = dbuser.User(id=user_id)
     session.add(user)
     await session.flush()
 
@@ -93,20 +95,24 @@ async def create_user(user_id: int, session: DBSession) -> UserResponse:
         }
     },
 )
-async def get_current_team(user_id: int, session: DBSession) -> UserTeamResponse:
+async def get_current_team(user_id: int, session: DBSession) -> team.UserTeam:
     """Get a user's current team information."""
-    user = await session.execute(select(User).where(User.id == user_id))
+    user = await session.execute(select(dbuser.User).where(dbuser.User.user_id == user_id))
     user.unique()
 
     if not user.scalars().one_or_none():
         raise HTTPException(status_code=404, detail="User with specified ID could not be found.")
 
-    ongoing_jam = (await session.execute(select(Jam).where(Jam.ongoing == True))).unique().scalars().one_or_none()
+    ongoing_jam = (
+        (await session.execute(select(jam.Jam).where(jam.Jam.ongoing == True))).unique().scalars().one_or_none()
+    )
 
     if not ongoing_jam:
         raise HTTPException(status_code=404, detail="There is no ongoing codejam.")
 
-    user_teams = (await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))).unique().scalars().all()
+    user_teams = (
+        None  # (await session.execute(select(TeamUser).where(TeamUser.user_id == user_id))).unique().scalars().all()
+    )
 
     current_team = None
     for user_team in user_teams:

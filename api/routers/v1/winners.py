@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import func
 from sqlalchemy.future import select
 
-from api.database import DBSession, Jam, User
-from api.database import Winner as DbWinner
-from api.models import Winner, WinnerResponse
+from api.models.orm import Jam, Team, User
+from api.models.schemas.v1.winner import Winner, WinnerResponse
+from api.settings import DBSession
 
 router = APIRouter(prefix="/winners", tags=["winners"])
 
@@ -15,13 +15,13 @@ router = APIRouter(prefix="/winners", tags=["winners"])
 )
 async def get_winners(jam_id: int, session: DBSession) -> list[WinnerResponse]:
     """Get the top ten winners from the specified codejam."""
-    jam = await session.execute(select(Jam).where(Jam.id == jam_id))
+    jam = await session.execute(select(Jam).where(Jam.jam_id == jam_id))
     jam.unique()
 
     if not jam.scalars().one_or_none():
         raise HTTPException(404, "Jam with specified ID could not be found")
 
-    winners = await session.execute(select(DbWinner).where(DbWinner.jam_id == jam_id))
+    winners = await session.execute(select(Team).where(Team.winner))
     winners.unique()
     return winners.scalars().all()
 
@@ -58,15 +58,6 @@ async def create_winners(jam_id: int, winners: list[Winner], session: DBSession)
 
     if len(users.scalars().all()) != len(winner_ids):
         raise HTTPException(404, "Some users could not be found in the database.")
-
-    # Make sure none of the winners are in the winners database.
-    db_winners = await session.execute(
-        select(DbWinner).where((DbWinner.user_id == func.any(winner_ids)) & (DbWinner.jam_id == jam_id))
-    )
-    db_winners.unique()
-
-    if db_winners.scalars().all():
-        raise HTTPException(409, "Some winners already exist in the database.")
 
     winners_response = []
 
