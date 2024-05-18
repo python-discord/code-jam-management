@@ -78,4 +78,4 @@ jobs:
           manifests: |
             kubernetes/kubernetes/namespaces/apis/code-jam-management/deployment.yaml
           images: 'ghcr.io/python-discord/code-jam-management:${{ inputs.sha-tag }}'
-          namespace: api
+          namespace: apis
