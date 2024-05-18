@@ -61,7 +61,7 @@ jobs:
       - name: Checkout Kubernetes Repository
         uses: actions/checkout@v3
         with:
-          repository: python-discord/kubernetes
+          repository: python-discord/infra
           path: kubernetes
 
       - uses: azure/setup-kubectl@v3
@@ -76,5 +76,5 @@ jobs:
         uses: Azure/k8s-deploy@v4
         with:
           manifests: |
-            kubernetes/namespaces/apis/code-jam-management/deployment.yaml
+            kubernetes/kubernetes/namespaces/apis/code-jam-management/deployment.yaml
           images: 'ghcr.io/python-discord/code-jam-management:${{ inputs.sha-tag }}'
